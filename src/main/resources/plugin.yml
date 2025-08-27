@@ -1,0 +1,17 @@
+name: PvpWorld
+version: ${project.version}
+main: me.ujun.pvpWorld.PvpWorld
+api-version: '1.21'
+softdepend: [WorldEdit, FastAsyncWorldEdit]
+commands:
+  lobby:
+  ffa:
+  duel:
+  party:
+  pvpworld:
+    permission: pvpworld.admin
+    usage: /pvpworld <subcommand>
+
+permissions:
+  pvpworld.admin:
+    default: op
