@@ -50,13 +50,13 @@ public class DuelUtil {
         return players;
     }
 
-    public void sendTitleToPlayers(String message, Instance inst, int a, int b, int c) {
+    public void sendTitleToPlayers(Instance inst, String message, int a, int b, int c) {
         for (Player player : getInstOnlinePlayers(inst)) {
             player.sendTitle(message, "", a, b, c);
         }
     }
 
-    public void sendEndTitle(Set<UUID> winnerTeam, Instance inst) {
+    public void sendEndTitle(Instance inst, Set<UUID> winnerTeam) {
         String winnerNames = joinAnyNames(winnerTeam);
 
         for (Player p : getInstOnlinePlayers(inst)) {

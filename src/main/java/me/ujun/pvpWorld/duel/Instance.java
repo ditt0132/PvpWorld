@@ -21,7 +21,6 @@ public class Instance {
     public Map<UUID, Integer> scoreMap = new HashMap<>();
     public Map<String, Integer> partyScoreMap = new HashMap<>();
     public int roundSetting;
-    public int round = 0;
     public ArenaMeta meta;
 
     public final int sx, sy, sz;

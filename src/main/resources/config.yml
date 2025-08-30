@@ -5,7 +5,7 @@ ffa_tag: ffa_player
 fight_time: 15
 fight_message: "§c§l%sec%초 후 전투가 종료됩니다"
 fight_end_message: "§c§l전투가 종료되었습니다"
-blocked_commands_during-fight:
+blocked_commands_during_fight:
   - /lobby
   - /pvpworld:lobby
   - /kit

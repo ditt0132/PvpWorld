@@ -16,10 +16,6 @@ public class LobbyCMD implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "플레이어만 사용할 수 있습니다.");
             return false;
         }
-        if (!player.getLocation().getWorld().getName().equals(ConfigHandler.pvpWorld)) {
-            sender.sendMessage(ChatColor.RED + "해당 월드에서는 사용할 수 없습니다.");
-            return false;
-        }
 
         if (ConfigHandler.lobby != null) {
             ResetUtil.joinLobby(player);

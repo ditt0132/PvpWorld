@@ -197,11 +197,11 @@ public class DuelListener implements Listener {
         if (duel.isCountdown(p)) { e.setCancelled(true); return; }
 
         if (e.getFinalDamage() >= p.getHealth()) {
-            if (hasTotemInHand(p)) {
+            if (hasTotemInHand(p) && !(e.getCause().equals(EntityDamageEvent.DamageCause.VOID))) {
                 return;
             }
 
-            e.setCancelled(true); // 자연사 방지
+            e.setCancelled(true);
 
             Player killer = null;
             if (e instanceof EntityDamageByEntityEvent by) {
@@ -234,15 +234,14 @@ public class DuelListener implements Listener {
             return;
         }
 
-        if (!duel.spectators.contains(player.getUniqueId())) {
-            duel.eliminate(player, player.getKiller());
-            duel.setSpectator(player, false);
-        }
-
-
         Instance inst = duel.getInstanceOf(player);
         inst.teamA.remove(player.getUniqueId());
         inst.teamB.remove(player.getUniqueId());
+
+        if (!duel.spectators.contains(player.getUniqueId())) {
+            duel.eliminate(player, player.getKiller());
+            duel.setSpectator(player, false, inst);
+        }
 
         duel.byPlayer.remove(player.getUniqueId());
     }

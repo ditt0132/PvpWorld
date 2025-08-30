@@ -155,7 +155,7 @@ public class DuelManager {
                     byPlayer.put(p.getUniqueId(), inst);
                     p.setGameMode(GameMode.SURVIVAL);
                     ResetUtil.resetPlayerState(p);
-                    setSpectator(p, false);
+                    setSpectator(p, false, inst);
 
                     if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 12000, 255, false, false, false));
@@ -169,7 +169,7 @@ public class DuelManager {
                     byPlayer.put(p.getUniqueId(), inst);
                     p.setGameMode(GameMode.SURVIVAL);
                     ResetUtil.resetPlayerState(p);
-                    setSpectator(p, false);
+                    setSpectator(p, false, inst);
 
                     if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 12000, 255, false, false, false));
@@ -204,7 +204,7 @@ public class DuelManager {
                     p.setGameMode(GameMode.SURVIVAL);
                     ResetUtil.resetPlayerState(p);
                     p.teleport(baseC);
-                    setSpectator(p, false);
+                    setSpectator(p, false, inst);
 
                     if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 12000, 255, false, false, false));
@@ -232,7 +232,7 @@ public class DuelManager {
         }
     }
 
-    private boolean startRound(Instance inst) {
+    private void startRound(Instance inst) {
 
         try {
             World w = voidWorld.ensure();
@@ -247,7 +247,7 @@ public class DuelManager {
             if (inst.type.equals("duel")) {
                 if (inst.teamA.isEmpty() || inst.teamB.isEmpty()) {
                     endInternal(inst);
-                    return false;
+                    return;
                 }
 
                 Location baseA = origin.clone().add(inst.meta.spawn1().dx(), inst.meta.spawn1().dy(), inst.meta.spawn1().dz());
@@ -257,10 +257,10 @@ public class DuelManager {
                 baseB.setYaw(inst.meta.spawn2().yaw());
                 baseB.setPitch(inst.meta.spawn2().pitch());
 
-                for (Player p : idsToPlayers(inst.teamA)) {
+                for (Player p : dualUtil.getInstOnlinePlayers(inst)) {
                     kitManager.applyTo(p, inst.kit, true, true);
                     p.setGameMode(GameMode.SURVIVAL);
-                    setSpectator(p, false);
+                    setSpectator(p, false, inst);
                     ResetUtil.resetPlayerState(p);
                     if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
                         p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 12000, 255, false, false, false));
@@ -268,16 +268,6 @@ public class DuelManager {
                     }
                 }
 
-                for (Player p : idsToPlayers(inst.teamB)) {
-                    kitManager.applyTo(p, inst.kit, true, true);
-                    p.setGameMode(GameMode.SURVIVAL);
-                    setSpectator(p, false);
-                    ResetUtil.resetPlayerState(p);
-                    if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 12000, 255, false, false, false));
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 12000, 255, false, false, false));
-                    }
-                }
 
                 for (UUID id : dualUtil.getInstPlayers(inst)) {
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
@@ -294,7 +284,7 @@ public class DuelManager {
             } else if (inst.type.equals("ffa")) {
                 if (inst.teamA.size() <= 1) {
                     endInternal(inst);
-                    return false;
+                    return;
                 }
 
                 Location baseC = origin.clone().add(inst.meta.center().dx(), inst.meta.center().dy(), inst.meta.center().dz());
@@ -304,7 +294,7 @@ public class DuelManager {
                     kitManager.applyTo(p, inst.kit, true, true);
                     p.setGameMode(GameMode.SURVIVAL);
                     ResetUtil.resetPlayerState(p);
-                    setSpectator(p, false);
+                    setSpectator(p, false, inst);
                     p.teleport(baseC);
 
                     if (inst.kit.getType().equals("sumo") || inst.kit.getType().equals("spleef")) {
@@ -324,17 +314,15 @@ public class DuelManager {
                 }
 
             } else {
-                return false;
+                return;
             }
 
-            inst.round++;
+
             startTimeout(inst);
             startCountdown(inst);
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
             Bukkit.getLogger().warning("라운드 시작 실패: " + e.getMessage());
-            return false;
         }
     }
 
@@ -403,13 +391,13 @@ public class DuelManager {
                             (left[0] == 3) ? "§e3" :
                                     (left[0] == 2) ? "§62" :
                                             "§c1";
-                    dualUtil.sendTitleToPlayers(title, inst, 0, 25, 0); // 예: p.sendTitle(title, "", 0, 20, 0);
+                    dualUtil.sendTitleToPlayers(inst, title, 0, 25, 0); // 예: p.sendTitle(title, "", 0, 20, 0);
                     dualUtil.playSoundToPlayers(inst, Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
                     left[0]--;
                     return;
                 }
                 // START!
-                dualUtil.sendTitleToPlayers("§bSTART!", inst, 0, 10, 0); // 아쿠아
+                dualUtil.sendTitleToPlayers(inst, "§bSTART!", 0, 10, 0); // 아쿠아
                 dualUtil.playSoundToPlayers(inst, Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
                 inst.countdown = false;
                 this.cancel();
@@ -422,18 +410,12 @@ public class DuelManager {
 
 
         inst.timeoutTaskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            checkRoundVictory(inst, true);
-            endInternal(inst);
+            checkRoundEnd(inst, true);
         }, ticks10min).getTaskId();
     }
 
 
 
-    private int aliveCount(Instance inst, Set<UUID> team) {
-        int c = 0;
-        for (UUID id : team) if (!inst.eliminated.contains(id)) c++;
-        return c;
-    }
 
     private void endInternal(Instance inst) {
         if (inst.ended) return;
@@ -460,7 +442,7 @@ public class DuelManager {
 
         // 관전자 해제 + 로비 이동
         for (Player p : players) {
-            setSpectator(p, false);
+            setSpectator(p, false, inst);
             ResetUtil.joinLobby(p); // TP/상태 초기화 유틸
         }
 
@@ -500,7 +482,7 @@ public class DuelManager {
     }
 
 
-    public void setSpectator(Player p, boolean enable) {
+    public void setSpectator(Player p, boolean enable,Instance inst) {
         UUID id = p.getUniqueId();
         if (enable) {
             ResetUtil.resetPlayerState(p);
@@ -512,7 +494,7 @@ public class DuelManager {
             p.setCanPickupItems(false);
             p.setInvulnerable(true);
             p.getInventory().clear();
-            for (Player other : Bukkit.getOnlinePlayers()) {
+            for (Player other : dualUtil.getInstOnlinePlayers(inst)) {
                 if (!other.getUniqueId().equals(id)) other.hidePlayer(plugin, p);
             }
         } else {
@@ -533,9 +515,6 @@ public class DuelManager {
 
         // 1) 원하는 타입 우선
         var list = all.stream()
-
-
-
                 .filter(m -> typeEquals(m.type(), wantType))
                 .collect(Collectors.toList());
 
@@ -568,19 +547,10 @@ public class DuelManager {
         Instance inst = byPlayer.get(dead.getUniqueId());
         if (inst == null) return;
 
-        // 즉시 관전자 전환: 같은 자리 약간 위로 띄워 안전 보정
-        Location at = dead.getLocation().clone();
-        at.add(0, 0.5, 0);
-        at.getWorld().getChunkAt(at).load();
-
-
         inst.eliminated.add(dead.getUniqueId());
-        dead.teleport(at);
-        setSpectator(dead, true);
-
+        setSpectator(dead, true, inst);
 
         String deathMessage;
-        // 메시지
         if (killer != null) {
             deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + ChatColor.GREEN + killer.getName() + ChatColor.RESET + "님에게 살해당했습니다");
         } else {
@@ -588,25 +558,25 @@ public class DuelManager {
         }
 
         dualUtil.sendMessageToPlayers(deathMessage, dualUtil.getInstOnlinePlayers(inst));
+        checkRoundEnd(inst, false);
+    }
 
+    private int aliveCount(Instance inst, Set<UUID> team) {
+        int c = 0;
+        for (UUID id : team) if (!inst.eliminated.contains(id)) c++;
+        return c;
+    }
+
+    private void checkRoundEnd(Instance inst, boolean isTimeout) {
+
+        int top[] = {0, 0};
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
+        Set<UUID> winnerPlayers = new HashSet<>();
 
         if (inst.type.equals("duel")) {
             if (aliveA == 0 || aliveB == 0) {
-
-                // 타이머 정리
-                if (inst.countdownTaskId != -1) {
-                    Bukkit.getScheduler().cancelTask(inst.countdownTaskId);
-                    inst.countdownTaskId = -1;
-                }
-                if (inst.timeoutTaskId != -1) {
-                    Bukkit.getScheduler().cancelTask(inst.timeoutTaskId);
-                    inst.timeoutTaskId = -1;
-                }
-
-                checkRoundVictory(inst, false);
-                int victoryCount;
+                checkRoundVictory(inst);
 
                 for (Player p : dualUtil.getInstOnlinePlayers(inst)) {
                     p.setInvulnerable(true);
@@ -616,96 +586,124 @@ public class DuelManager {
                     int teamAVictoryCount = inst.partyScoreMap.get("teamA");
                     int teamBVictoryCount = inst.partyScoreMap.get("teamB");
 
-
-                    dualUtil.sendTitleToPlayers("§f" + teamAVictoryCount + " §7-§f " + teamBVictoryCount, inst, 0, 40, 0);
-                    victoryCount = Math.max(teamAVictoryCount, teamBVictoryCount);
+                    top[0] = Math.max(teamAVictoryCount, teamBVictoryCount);
+                    top[1] = Math.min(teamAVictoryCount, teamBVictoryCount);
                 } else {
-                    int top[] = top2AllowDup(inst.scoreMap);
-                    victoryCount = top[0];
-                    dualUtil.sendTitleToPlayers("§f" + top[0] + " §7-§f " + top[1], inst, 0, 40, 0);
+                    top = top2AllowDup(inst.scoreMap);
                 }
 
-                if (victoryCount == inst.roundSetting) {
-                    checkVictory(inst);
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        endInternal(inst);
-                    }, 100L);
-                } else {
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        startRound(inst);
-                    }, 60L);
-                }
-
+            } else {
+                return;
             }
         } else if (inst.type.equals("ffa")) {
             if (aliveA <= 1) {
-                checkRoundVictory(inst, false);
+                checkRoundVictory(inst);
 
-                int top[] = top2AllowDup(inst.scoreMap);
+                top = top2AllowDup(inst.scoreMap);
 
-                dualUtil.sendTitleToPlayers("§f" + top[0] + " §7-§f " + top[1], inst, 0, 20, 0);
-
-                if (top[0] == inst.roundSetting) {
-                    checkVictory(inst);
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        endInternal(inst);
-                    }, 100L);
-                } else {
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        startRound(inst);
-                    }, 100L);
-                }
+            } else {
+                return;
             }
+        } else {
+            return;
+        }
+
+        if (isTimeout) {
+            dualUtil.sendTitleToPlayers(inst, ChatColor.YELLOW + "무승부", 0, 20, 0);
+        } else {
+            dualUtil.sendTitleToPlayers(inst, "§f" + top[0] + " §7-§f " + top[1], 0, 40, 0);
+        }
+
+        if (inst.countdownTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(inst.countdownTaskId);
+            inst.countdownTaskId = -1;
+        }
+        if (inst.timeoutTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(inst.timeoutTaskId);
+            inst.timeoutTaskId = -1;
+        }
+
+        if (top[0] == inst.roundSetting) {
+            checkVictory(inst);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                endInternal(inst);
+            }, 100L);
+        } else {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                startRound(inst);
+            }, 60L);
         }
     }
 
-    private void checkRoundVictory(Instance inst, boolean isTimeout) {
+    private void checkRoundVictory(Instance inst) {
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
+        Set<UUID> winnerPlayers = new HashSet<>();
 
-        if (isTimeout) {
-            dualUtil.sendTitleToPlayers(ChatColor.YELLOW + "무승부", inst, 0, 20, 0);
-        } else {
             if (inst.type.equals("duel")) {
                 if (aliveA == 0 && aliveB > 0) {
                     if (inst.party) {
                         inst.partyScoreMap.put("teamB", inst.partyScoreMap.get("teamB") +1 );
+                        winnerPlayers = inst.teamB;
                     } else {
                         for (UUID id : inst.teamB) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) + 1);
+                            winnerPlayers = inst.teamB;
                         }
                     }
                 } else if (aliveB == 0 && aliveA > 0) {
                     if (inst.party) {
                         inst.partyScoreMap.put("teamA", inst.partyScoreMap.get("teamA") +1 );
+                        winnerPlayers = inst.teamA;
                     } else {
                         for (UUID id : inst.teamA) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) +1 );
+                            winnerPlayers = inst.teamA;
                         }
                     }
                 } else if (aliveA == 0 && aliveB == 0) {
-                    dualUtil.sendTitleToPlayers(ChatColor.YELLOW + "무승부", inst, 0, 20, 0);
+                    dualUtil.sendTitleToPlayers(inst,ChatColor.YELLOW + "무승부",0, 20, 0);
                 }
             } else if (inst.type.equals("ffa")) {
                 if (aliveA == 1) {
                     for (UUID id : inst.teamA) {
                         if (!inst.eliminated.contains(id)) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) + 1);
+                            winnerPlayers.add(id);
                             break;
                         }
                     }
                 } else if (aliveA == 0) {
-                    dualUtil.sendTitleToPlayers(ChatColor.YELLOW + "무승부", inst, 0, 20, 0);
+                    dualUtil.sendTitleToPlayers(inst,ChatColor.YELLOW + "무승부",0, 20, 0);
                 }
             }
-            dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
-        }
+
+        String message = "§6§l라운드 종료!\n\n\n§r";
+
+        String joined = idsToPlayers(winnerPlayers).stream()
+                .map(p -> {
+                    String name = p.getName();
+                    String status;
+                    if (inst.eliminated.contains(p.getUniqueId())) {
+                        status = "§cdead";
+                    } else {
+                        double hp = Math.max(0.0, p.getHealth());
+                        status = String.format("%.2f❤", hp);
+                    }
+                    return name + "§7(§c" + status + "§7)§r";
+                })
+                .collect(Collectors.joining("§r / §r"));
+
+        message += joined + " §a§l승리";
+        dualUtil.sendMessageToPlayers(message, dualUtil.getInstOnlinePlayers(inst));
+        dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
+
     }
 
     private void checkVictory(Instance inst) {
         UUID id = inst.scoreMap.entrySet().stream()
-                .filter(e -> e.getValue() != null)          // 값이 null일 수 있으면
-                .max(Map.Entry.comparingByValue())          // 가장 큰 Integer
+                .filter(e -> e.getValue() != null)
+                .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse(null);
 
@@ -714,20 +712,20 @@ public class DuelManager {
             if (inst.party) {
                 Set<UUID> victoryTeam = (inst.partyScoreMap.get("teamA") > inst.partyScoreMap.get("teamB")) ? inst.teamA : inst.teamB;
                 if (inst.teamA.equals(victoryTeam)) {
-                    dualUtil.sendEndTitle(inst.teamA, inst);
+                    dualUtil.sendEndTitle(inst, inst.teamA);
                 } else if (inst.teamB.equals(victoryTeam)) {
-                    dualUtil.sendEndTitle(inst.teamB, inst);
+                    dualUtil.sendEndTitle(inst, inst.teamB);
                 }
             } else {
                 if (inst.teamA.contains(id)) {
-                    dualUtil.sendEndTitle(inst.teamA, inst);
+                    dualUtil.sendEndTitle(inst, inst.teamA);
                 } else if (inst.teamB.contains(id)) {
-                    dualUtil.sendEndTitle(inst.teamB, inst);
+                    dualUtil.sendEndTitle(inst, inst.teamB);
                 }
             }
         } else if (inst.type.equals("ffa")) {
             inst.teamB.add(id);
-            dualUtil.sendEndTitle(inst.teamB, inst);
+            dualUtil.sendEndTitle(inst, inst.teamB);
         }
         dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
     }
