@@ -2,6 +2,7 @@ package me.ujun.pvpWorld.listener;
 
 import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.config.ConfigHandler;
+import me.ujun.pvpWorld.duel.DuelManager;
 import me.ujun.pvpWorld.util.ResetUtil;
 import org.bukkit.GameMode;
 import org.bukkit.World;
@@ -14,6 +15,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinPvpWorldListener implements Listener {
 
+    private final DuelManager duel;
+    public JoinPvpWorldListener(DuelManager duel) { this.duel = duel; }
 
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent event) {
@@ -23,7 +26,7 @@ public class JoinPvpWorldListener implements Listener {
             return;
         }
 
-        if (!player.getLocation().getWorld().getName().equals(ConfigHandler.pvpWorld)) {
+        if (!ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
             return;
         }
 
@@ -39,8 +42,9 @@ public class JoinPvpWorldListener implements Listener {
             return;
         }
 
+        if (duel.isInDuel(player)) return;
 
-        if (!to.getName().equals(ConfigHandler.pvpWorld)) {
+        if (!ConfigHandler.pvpWorld.contains(to.getName())) {
             return;
         }
 

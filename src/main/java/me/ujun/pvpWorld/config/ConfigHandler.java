@@ -16,7 +16,7 @@ public class ConfigHandler {
     public static int fightTime;
     public static List<String> blockedCommandsInFight = new ArrayList<>();
     public static String ffaTag;
-    public static String pvpWorld;
+    public static List<String> pvpWorld;
     public static Location lobby;
     public static List<String> allowedCommandsInPvpWorld = new ArrayList<>();
 
@@ -45,7 +45,7 @@ public class ConfigHandler {
         fightTime = config.getInt("fight_time", 15);
         blockedCommandsInFight = config.getStringList("blocked_commands_during_fight");
         ffaTag = config.getString("ffa_tag");
-        pvpWorld = config.getString("pvp_world");
+        pvpWorld = config.getStringList("pvp_world");
         lobby = config.getLocation("lobby");
         allowedCommandsInPvpWorld = config.getStringList("allowed_commands_in_pvp_world");
 

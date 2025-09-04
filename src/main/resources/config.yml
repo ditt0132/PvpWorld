@@ -1,4 +1,6 @@
-pvp_world: world
+pvp_world:
+  - world
+  - pvpworld_void
 lobby:
 
 ffa_tag: ffa_player

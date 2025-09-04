@@ -76,7 +76,7 @@ public class CommandTabCompleter implements TabCompleter {
             if (args.length == 1) {
                 return prefixed(KitManager.kits.keySet().stream().toList(), args[0]);
             }
-        } else if (command.getName().equals("duel")) {
+        } else if (command.getName().equals("duel") || command.getName().equals("forceduel")) {
             if (args.length == 1) {
                 return prefixed(getOnlinePlayerNames(), args[0]);
             } else if (args.length == 2) {

@@ -245,17 +245,4 @@ public class DuelListener implements Listener {
 
         duel.byPlayer.remove(player.getUniqueId());
     }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-
-        if (duel.isInDuel(player)) {
-            return;
-        }
-
-        if (player.getLocation().getWorld().getName().equals("pvpworld_void")) {
-            ResetUtil.joinLobby(player);
-        }
-    }
 }

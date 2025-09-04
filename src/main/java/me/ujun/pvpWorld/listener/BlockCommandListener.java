@@ -22,7 +22,8 @@ public class BlockCommandListener implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage().toLowerCase();
 
-        if (PvpWorld.pvpPlayerTimer.containsKey(player.getUniqueId())) {
+
+        if (PvpWorld.pvpPlayerTimer.containsKey(player.getUniqueId()) || duel.isInDuel(player)) {
             for (String blocked : ConfigHandler.blockedCommandsInFight) {
                 if (command.startsWith(blocked.toLowerCase())) {
                     player.sendMessage(ChatColor.RED + "PVP 중에는 해당 명령어를 사용할 수 없습니다!");
@@ -31,17 +32,8 @@ public class BlockCommandListener implements Listener {
                 }
             }
         }
-        else if (duel.isInDuel(player)) {
-            for (String blocked : ConfigHandler.blockedCommandsInFight) {
-                if (command.startsWith(blocked.toLowerCase())) {
-                    player.sendMessage(ChatColor.RED + "듀얼 중에는 해당 명령어를 사용할 수 없습니다!");
-                    event.setCancelled(true);
-                    return;
-                }
-            }
-        }
 
-        if (!PvpWorld.devPlayers.contains(player.getUniqueId()) && (player.getLocation().getWorld().getName().equals(ConfigHandler.pvpWorld) || player.getLocation().getWorld().getName().equals("pvpworld_void"))) {
+        if (!PvpWorld.devPlayers.contains(player.getUniqueId()) && ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
             for (String allowed : ConfigHandler.allowedCommandsInPvpWorld) {
                 if (command.startsWith(allowed.toLowerCase())) {
                     return;
@@ -58,7 +50,7 @@ public class BlockCommandListener implements Listener {
     public void onGamemodeChange(PlayerGameModeChangeEvent event) {
         Player player = event.getPlayer();
 
-        if (PvpWorld.devPlayers.contains(player.getUniqueId()) || (!player.getLocation().getWorld().getName().equals(ConfigHandler.pvpWorld)) && !player.getLocation().getWorld().getName().equals("pvpworld_void")) {
+        if (PvpWorld.devPlayers.contains(player.getUniqueId()) || (!ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName()))) {
             return;
         }
 

@@ -82,11 +82,14 @@ public final class PvpWorld extends JavaPlugin {
         getCommand("ffa").setExecutor(new FfaCMD(kitManager));
         getCommand("duel").setExecutor(new DuelCMD(kitManager, duelManager));
         getCommand("party").setExecutor(new PartyCMD(kitManager, duelManager));
+        getCommand("forceduel").setExecutor(new ForceDuelCMD(kitManager, duelManager));
         getCommand("lobby").setTabCompleter(new CommandTabCompleter());
         getCommand("pvpworld").setTabCompleter(new CommandTabCompleter());
         getCommand("ffa").setTabCompleter(new CommandTabCompleter());
         getCommand("duel").setTabCompleter(new CommandTabCompleter());
         getCommand("party").setTabCompleter(new CommandTabCompleter());
+        getCommand("forceduel").setTabCompleter(new CommandTabCompleter());
+
 
 
     }
@@ -95,7 +98,7 @@ public final class PvpWorld extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new FfaListener(this, kitManager), this);
         getServer().getPluginManager().registerEvents(new FoodChangeListener(), this);
         getServer().getPluginManager().registerEvents(new BlockCommandListener(duelManager), this);
-        getServer().getPluginManager().registerEvents(new JoinPvpWorldListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinPvpWorldListener(duelManager), this);
         getServer().getPluginManager().registerEvents(new KitEditorListener(kitManager), this);
         getServer().getPluginManager().registerEvents(new DuelListener(duelManager), this);
 

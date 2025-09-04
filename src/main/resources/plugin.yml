@@ -8,6 +8,9 @@ commands:
   ffa:
   duel:
   party:
+  forceduel:
+    permission: pvpworld.admin
+    usage: /forceduel <player> <kit> <round>
   pvpworld:
     permission: pvpworld.admin
     usage: /pvpworld <subcommand>
