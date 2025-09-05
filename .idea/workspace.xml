@@ -5,18 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="004bb2c4-cfbf-4ce6-9e0b-a60350fb0ea7" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/command/ForceDuelCMD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/PvpWorld.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/PvpWorld.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/command/CommandTabCompleter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/command/CommandTabCompleter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/config/ConfigHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/config/ConfigHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/duel/DuelManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/duel/DuelManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/duel/Instance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/duel/Instance.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/BlockCommandListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/BlockCommandListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/DuelListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/DuelListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/JoinPvpWorldListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/ujun/pvpWorld/listener/JoinPvpWorldListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/config.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

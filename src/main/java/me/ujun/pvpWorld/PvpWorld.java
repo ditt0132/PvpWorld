@@ -59,6 +59,7 @@ public final class PvpWorld extends JavaPlugin {
         arenaManager = new ArenaManager(arenasFile);
         duelManager = new DuelManager(arenaManager, arenasFile, voidWorld, allocator, kitManager, duelUtil, this);
 
+        voidWorld.ensure();
 
        registerCommands();
        registerListeners();
@@ -89,9 +90,6 @@ public final class PvpWorld extends JavaPlugin {
         getCommand("duel").setTabCompleter(new CommandTabCompleter());
         getCommand("party").setTabCompleter(new CommandTabCompleter());
         getCommand("forceduel").setTabCompleter(new CommandTabCompleter());
-
-
-
     }
 
     private void registerListeners() {
