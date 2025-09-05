@@ -570,14 +570,13 @@ public class DuelManager {
     private void checkRoundEnd(Instance inst, boolean isTimeout) {
 
         int top[] = {0, 0};
+        Set<UUID> winnerPlayers = new HashSet<>();
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
-        Set<UUID> winnerPlayers = new HashSet<>();
+
 
         if (inst.type.equals("duel")) {
             if (aliveA == 0 || aliveB == 0) {
-                checkRoundVictory(inst);
-
                 for (Player p : dualUtil.getInstOnlinePlayers(inst)) {
                     p.setInvulnerable(true);
                 }
@@ -592,15 +591,14 @@ public class DuelManager {
                     top = top2AllowDup(inst.scoreMap);
                 }
 
+                winnerPlayers = checkRoundVictory(inst);
             } else {
                 return;
             }
         } else if (inst.type.equals("ffa")) {
             if (aliveA <= 1) {
-                checkRoundVictory(inst);
-
                 top = top2AllowDup(inst.scoreMap);
-
+                winnerPlayers = checkRoundVictory(inst);
             } else {
                 return;
             }
@@ -611,6 +609,24 @@ public class DuelManager {
         if (isTimeout) {
             dualUtil.sendTitleToPlayers(inst, ChatColor.YELLOW + "무승부", 0, 20, 0);
         } else {
+            String message = "§6§l라운드 종료!\n§f" + top[0] + " §7-§f " + top[1] + "\n§r";
+
+            String joined = idsToPlayers(winnerPlayers).stream()
+                    .map(p -> {
+                        String name = p.getName();
+                        String status;
+                        if (inst.eliminated.contains(p.getUniqueId())) {
+                            status = "§cdead";
+                        } else {
+                            double hp = Math.max(0.0, p.getHealth());
+                            status = String.format("%.2f❤", hp);
+                        }
+                        return name + "§7(§c" + status + "§7)§r";
+                    })
+                    .collect(Collectors.joining("§r / §r"));
+
+            message += joined + " §a§l승리";
+            dualUtil.sendMessageToPlayers(message, dualUtil.getInstOnlinePlayers(inst));
             dualUtil.sendTitleToPlayers(inst, "§f" + top[0] + " §7-§f " + top[1], 0, 40, 0);
         }
 
@@ -635,7 +651,7 @@ public class DuelManager {
         }
     }
 
-    private void checkRoundVictory(Instance inst) {
+    private Set<UUID> checkRoundVictory(Instance inst) {
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
         Set<UUID> winnerPlayers = new HashSet<>();
@@ -678,25 +694,8 @@ public class DuelManager {
                 }
             }
 
-        String message = "§6§l라운드 종료!\n\n\n§r";
-
-        String joined = idsToPlayers(winnerPlayers).stream()
-                .map(p -> {
-                    String name = p.getName();
-                    String status;
-                    if (inst.eliminated.contains(p.getUniqueId())) {
-                        status = "§cdead";
-                    } else {
-                        double hp = Math.max(0.0, p.getHealth());
-                        status = String.format("%.2f❤", hp);
-                    }
-                    return name + "§7(§c" + status + "§7)§r";
-                })
-                .collect(Collectors.joining("§r / §r"));
-
-        message += joined + " §a§l승리";
-        dualUtil.sendMessageToPlayers(message, dualUtil.getInstOnlinePlayers(inst));
-        dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
+            dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
+            return winnerPlayers;
 
     }
 

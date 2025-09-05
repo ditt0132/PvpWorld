@@ -33,6 +33,8 @@ public class BlockCommandListener implements Listener {
             }
         }
 
+//        player.sendMessage(player.getLocation().getWorld().getName());
+
         if (!PvpWorld.devPlayers.contains(player.getUniqueId()) && ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
             for (String allowed : ConfigHandler.allowedCommandsInPvpWorld) {
                 if (command.startsWith(allowed.toLowerCase())) {
@@ -40,7 +42,7 @@ public class BlockCommandListener implements Listener {
                 }
             }
 
-            player.sendMessage(command);
+//            player.sendMessage(command);
             player.sendMessage(ChatColor.RED + "PVP 월드에서는 해당 명령어를 사용할 수 없습니다!");
             event.setCancelled(true);
         }
