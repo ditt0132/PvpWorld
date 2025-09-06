@@ -9,6 +9,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.royawesome.jlibnoise.module.combiner.Max;
 import org.antlr.v4.semantics.BlankActionSplitterListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,6 +53,7 @@ public class DuelCMD implements CommandExecutor {
         if (!(sender instanceof Player player)) {
             return false;
         }
+
 
         if (args.length < 2) {
             return false;
@@ -145,7 +147,7 @@ public class DuelCMD implements CommandExecutor {
         Kit kit = kitManager.get(kitName);
 
         if (args.length > 2) {
-            roundSetting = Integer.parseInt(args[2]);
+            roundSetting = Math.max(Integer.parseInt(args[2]), 1);
         }
 
         inbox.computeIfAbsent(target.getUniqueId(), k -> new HashMap<>())

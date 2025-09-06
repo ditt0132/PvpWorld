@@ -570,7 +570,7 @@ public class DuelManager {
     private void checkRoundEnd(Instance inst, boolean isTimeout) {
 
         int top[] = {0, 0};
-        Set<UUID> winnerPlayers = new HashSet<>();
+        Set<UUID> winnerPlayers;
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
 
@@ -581,6 +581,8 @@ public class DuelManager {
                     p.setInvulnerable(true);
                 }
 
+                winnerPlayers = checkRoundVictory(inst);
+
                 if (inst.party) {
                     int teamAVictoryCount = inst.partyScoreMap.get("teamA");
                     int teamBVictoryCount = inst.partyScoreMap.get("teamB");
@@ -590,15 +592,13 @@ public class DuelManager {
                 } else {
                     top = top2AllowDup(inst.scoreMap);
                 }
-
-                winnerPlayers = checkRoundVictory(inst);
             } else {
                 return;
             }
         } else if (inst.type.equals("ffa")) {
             if (aliveA <= 1) {
-                top = top2AllowDup(inst.scoreMap);
                 winnerPlayers = checkRoundVictory(inst);
+                top = top2AllowDup(inst.scoreMap);
             } else {
                 return;
             }
