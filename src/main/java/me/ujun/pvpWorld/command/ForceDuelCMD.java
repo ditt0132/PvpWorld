@@ -69,7 +69,7 @@ public class ForceDuelCMD implements CommandExecutor {
         Kit kit = kitManager.get(kitName);
 
         if (args.length > 2) {
-            roundSetting = Integer.parseInt(args[2]);
+            roundSetting = Math.max(Integer.parseInt(args[2]), 1);
         }
 
         player.sendMessage("§a§l" + target.getName() + "§f§l님에게 강제 듀얼을 실행했습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + roundSetting + "§f§l)");

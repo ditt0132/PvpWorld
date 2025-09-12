@@ -6,6 +6,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.world.block.BlockTypes;
+import it.unimi.dsi.fastutil.chars.Char2ShortRBTreeMap;
 import me.ujun.pvpWorld.arena.*;
 import me.ujun.pvpWorld.kit.Kit;
 import me.ujun.pvpWorld.kit.KitManager;
@@ -68,7 +69,7 @@ public class DuelManager {
 
         Component msg1 = Component.text("듀얼이 시작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                 .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                .append(Component.text(dualUtil.joinAnyNames(teamB), NamedTextColor.GREEN,  TextDecoration.BOLD))
+                .append(Component.text(dualUtil.joinAnyNames(teamB, NamedTextColor.GREEN), NamedTextColor.GREEN,  TextDecoration.BOLD))
                 .append(Component.text("\n키트: ", NamedTextColor.WHITE,  TextDecoration.BOLD))
                 .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                 .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -76,7 +77,7 @@ public class DuelManager {
 
         Component msg2 = Component.text("듀얼이 시작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                 .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                .append(Component.text(dualUtil.joinAnyNames(teamA), NamedTextColor.GREEN,  TextDecoration.BOLD))
+                .append(Component.text(dualUtil.joinAnyNames(teamA, NamedTextColor.GREEN), NamedTextColor.GREEN,  TextDecoration.BOLD))
                 .append(Component.text("\n키트: ", NamedTextColor.WHITE,  TextDecoration.BOLD))
                 .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                 .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -101,9 +102,9 @@ public class DuelManager {
             List<Player> exceptSelf = new ArrayList<>(players);
             exceptSelf.remove(p);
 
-            Component msg = Component.text("듀얼이 시작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
+            Component msg = Component.text("ffa가 작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                     .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                    .append(Component.text(dualUtil.joinAnyNames(exceptSelf), NamedTextColor.GREEN, TextDecoration.BOLD))
+                    .append(Component.text(dualUtil.joinAnyNames(exceptSelf, NamedTextColor.GREEN), NamedTextColor.GREEN, TextDecoration.BOLD))
                     .append(Component.text("\n키트: ", NamedTextColor.WHITE, TextDecoration.BOLD))
                     .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                     .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -574,6 +575,8 @@ public class DuelManager {
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
 
+        int countA = inst.teamA.size();
+        int countB = inst.teamB.size();
 
         if (inst.type.equals("duel")) {
             if (aliveA == 0 || aliveB == 0) {
@@ -599,6 +602,9 @@ public class DuelManager {
             if (aliveA <= 1) {
                 winnerPlayers = checkRoundVictory(inst);
                 top = top2AllowDup(inst.scoreMap);
+
+                countA--;
+                countB = 1;
             } else {
                 return;
             }
@@ -639,7 +645,7 @@ public class DuelManager {
             inst.timeoutTaskId = -1;
         }
 
-        if (top[0] == inst.roundSetting) {
+        if ((top[0] == inst.roundSetting) || (countA == 0 || countB == 0) ) {
             checkVictory(inst);
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 endInternal(inst);

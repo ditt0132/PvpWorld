@@ -391,7 +391,7 @@ public class PartyCMD implements CommandExecutor {
             int roundSetting = 1;
 
             if (args.length > 2) {
-                roundSetting = Integer.parseInt(args[2]);
+                roundSetting = Math.max(Integer.parseInt(args[2]), 1);
             }
 
             Set<UUID> partyPlayerIds = partys.get(p.getUniqueId());
@@ -456,7 +456,7 @@ public class PartyCMD implements CommandExecutor {
             int roundSetting = 1;
 
             if (args.length > 3) {
-                roundSetting = Integer.parseInt(args[3]);
+                roundSetting = Math.max(Integer.parseInt(args[2]), 1);
             }
 
 

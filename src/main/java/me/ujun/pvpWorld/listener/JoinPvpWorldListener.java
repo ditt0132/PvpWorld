@@ -22,9 +22,6 @@ public class JoinPvpWorldListener implements Listener {
     private void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (PvpWorld.devPlayers.contains(player.getUniqueId())) {
-            return;
-        }
 
         if (!ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
             return;
@@ -38,11 +35,18 @@ public class JoinPvpWorldListener implements Listener {
         Player player = event.getPlayer();
         World to = player.getWorld();
 
+        if (duel.isInDuel(player)) {
+            if (event.getFrom().getName().equals("pvpworld_void")) {
+                duel.eliminate(player, null);
+            } else {
+                return;
+            }
+        }
+
         if (PvpWorld.devPlayers.contains(player.getUniqueId())) {
             return;
         }
 
-        if (duel.isInDuel(player)) return;
 
         if (!ConfigHandler.pvpWorld.contains(to.getName())) {
             return;

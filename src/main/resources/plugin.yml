@@ -5,9 +5,13 @@ api-version: '1.21'
 softdepend: [WorldEdit, FastAsyncWorldEdit]
 commands:
   lobby:
+    permission: pvpworld.lobby
   ffa:
+    permission: pvpworld.ffa
   duel:
+    permission: pvpworld.duel
   party:
+    permission: pvpworld.party
   forceduel:
     permission: pvpworld.admin
     usage: /forceduel <player> <kit> <round>
@@ -18,3 +22,11 @@ commands:
 permissions:
   pvpworld.admin:
     default: op
+  pvpworld.ffa:
+    default: true
+  pvpworld.duel:
+    default: true
+  pvpworld.party:
+    default: true
+  pvpworld.lobby:
+    default: true
