@@ -49,6 +49,8 @@ public class DuelWatchCMD implements CommandExecutor {
             sender.sendMessage("듀얼 중인 플레이어가 아님");
             return false;
         }
+        duel.byPlayer.put(player.getUniqueId(), inst);
+
         Location loc = inst.origin.clone().add(inst.meta.center().dx(), inst.meta.center().dy(), inst.meta.center().dz());
         loc.add(0.5, 0, 0.5);
         player.teleport(loc);
@@ -56,7 +58,6 @@ public class DuelWatchCMD implements CommandExecutor {
         sender.sendMessage(target.getName() + "의 관전을 시작했습니다");
         duel.setSpectator(player, true, inst);
         Bukkit.getLogger().info(String.valueOf(player.getAllowFlight()));
-        duel.byPlayer.put(player.getUniqueId(), inst);
         inst.watchers.add(player.getUniqueId());
 
 

@@ -112,9 +112,9 @@ public class CommandTabCompleter implements TabCompleter {
     }
 
     private List<String> getDuelOnlinePlayerNames() {
-        return  Bukkit.getOnlinePlayers().stream()
+        return Bukkit.getOnlinePlayers().stream()
                 .filter(duel::isInDuel)
-                .map(Player::getName)                  // 이름만 추출
+                .map(Player::getName)
                 .collect(Collectors.toList());
     }
 

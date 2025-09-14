@@ -731,6 +731,7 @@ public class DuelManager {
         if (inst.watchers.contains(p.getUniqueId())) {
             setSpectator(p, false, inst);
             inst.watchers.remove(p.getUniqueId());
+            byPlayer.remove(p.getUniqueId());
         } else {
             if (inst.type.equals("duel")) {
                 if (inst.teamB.contains(p.getUniqueId())) {

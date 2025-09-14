@@ -95,7 +95,7 @@ public final class PvpWorld extends JavaPlugin {
         getCommand("duelwatch").setExecutor(new DuelWatchCMD(duelManager));
         getCommand("leave").setExecutor(new LeaveCMD(duelManager));
 
-        getCommand("lobby").setTabCompleter(new CommandTabCompleter());
+        getCommand("lobby").setTabCompleter(commandTabCompleter);
         getCommand("pvpworld").setTabCompleter(commandTabCompleter);
         getCommand("ffa").setTabCompleter(commandTabCompleter);
         getCommand("duel").setTabCompleter(commandTabCompleter);
