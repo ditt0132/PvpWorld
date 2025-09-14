@@ -2,6 +2,7 @@ name: PvpWorld
 version: ${project.version}
 main: me.ujun.pvpWorld.PvpWorld
 api-version: '1.21'
+author: U_jun
 softdepend: [WorldEdit, FastAsyncWorldEdit]
 commands:
   lobby:
@@ -12,6 +13,10 @@ commands:
     permission: pvpworld.duel
   party:
     permission: pvpworld.party
+  duelwatch:
+    permission: pvpworld.duelwatch
+  leave:
+    permission: pvpworld.leave
   forceduel:
     permission: pvpworld.admin
     usage: /forceduel <player> <kit> <round>
@@ -29,4 +34,8 @@ permissions:
   pvpworld.party:
     default: true
   pvpworld.lobby:
+    default: true
+  pvpworld.duelwatch:
+    default: true
+  pvpworld.leave:
     default: true

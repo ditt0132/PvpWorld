@@ -13,9 +13,11 @@ public class Instance {
     public final Set<UUID> teamA = new HashSet<>();
     public final Set<UUID> teamB = new HashSet<>();
     public final Set<UUID> eliminated = new HashSet<>();
+    public final Set<UUID> watchers = new HashSet<>();
 
     public int slotIndex = -1;      // allocator 슬롯 인덱스
     public boolean ended = false;
+    public boolean isShuttingDown = false;
     public boolean party;
     public String type;
     public Map<UUID, Integer> scoreMap = new HashMap<>();
@@ -23,6 +25,7 @@ public class Instance {
     public int roundSetting;
     public int top[] = {0, 0};
     public ArenaMeta meta;
+    public int leftTime = 600;
 
     public final int sx, sy, sz;
     public volatile boolean countdown = true; // ⬅ 카운트다운 중 여부

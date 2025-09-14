@@ -13,6 +13,7 @@ import me.ujun.pvpWorld.kit.KitManager;
 import me.ujun.pvpWorld.saving.ArenasFile;
 import me.ujun.pvpWorld.util.ResetUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
@@ -22,9 +23,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.ChatPaginator;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.plaf.SpinnerUI;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -41,6 +45,7 @@ public class DuelManager {
 
     public final Set<UUID> spectators = new HashSet<>();
     public final Map<UUID, Instance> byPlayer = new HashMap<>();
+    public final Set<UUID> offlinePlayers = new HashSet<>();
 
     public DuelManager(ArenaManager arenaManager, ArenasFile arenasFile, VoidManager voidWorld, ArenaAllocator allocator, KitManager kitManager, DuelUtil dualUtil, JavaPlugin plugin) {
         this.arenaManager = arenaManager;
@@ -58,9 +63,8 @@ public class DuelManager {
     }
 
     public boolean startDuel(List<Player> teamA, List<Player> teamB, Kit kit, int roundSetting, boolean party) {
-        // kit 타입
-        String wantType = kit.getType();
-        ArenaMeta meta = pickRandomArenaByType(wantType);
+
+        ArenaMeta meta = pickRandomArenaByType(kit.getType());
         if (meta == null) {
             Bukkit.getLogger().warning("사용 가능한 아레나가 없습니다.");
             return false;
@@ -69,7 +73,7 @@ public class DuelManager {
 
         Component msg1 = Component.text("듀얼이 시작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                 .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                .append(Component.text(dualUtil.joinAnyNames(teamB, NamedTextColor.GREEN), NamedTextColor.GREEN,  TextDecoration.BOLD))
+                .append(Component.text(dualUtil.joinAnyNames(teamB, "§a§l"), NamedTextColor.GREEN,  TextDecoration.BOLD))
                 .append(Component.text("\n키트: ", NamedTextColor.WHITE,  TextDecoration.BOLD))
                 .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                 .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -77,7 +81,7 @@ public class DuelManager {
 
         Component msg2 = Component.text("듀얼이 시작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                 .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                .append(Component.text(dualUtil.joinAnyNames(teamA, NamedTextColor.GREEN), NamedTextColor.GREEN,  TextDecoration.BOLD))
+                .append(Component.text(dualUtil.joinAnyNames(teamA, "§a§l"), NamedTextColor.GREEN,  TextDecoration.BOLD))
                 .append(Component.text("\n키트: ", NamedTextColor.WHITE,  TextDecoration.BOLD))
                 .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                 .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -91,8 +95,7 @@ public class DuelManager {
     }
 
     public boolean startFFA(List<Player> players, Kit kit, int roundSetting) {
-        String wantType = kit.getType();
-        ArenaMeta meta = pickRandomArenaByType(wantType);
+        ArenaMeta meta = pickRandomArenaByType(kit.getType());
         if (meta == null) {
             Bukkit.getLogger().warning("사용 가능한 아레나가 없습니다.");
             return false;
@@ -104,7 +107,7 @@ public class DuelManager {
 
             Component msg = Component.text("ffa가 작됩니다", NamedTextColor.GOLD, TextDecoration.BOLD)
                     .append(Component.text("\n\n상대: ", NamedTextColor.WHITE, TextDecoration.BOLD))
-                    .append(Component.text(dualUtil.joinAnyNames(exceptSelf, NamedTextColor.GREEN), NamedTextColor.GREEN, TextDecoration.BOLD))
+                    .append(Component.text(dualUtil.joinAnyNames(exceptSelf, "§a§l"), NamedTextColor.GREEN, TextDecoration.BOLD))
                     .append(Component.text("\n키트: ", NamedTextColor.WHITE, TextDecoration.BOLD))
                     .append(Component.text(kit.getDisplayName(), NamedTextColor.AQUA, TextDecoration.BOLD))
                     .append(Component.text("\n라운드: ", NamedTextColor.WHITE, TextDecoration.BOLD)).
@@ -194,7 +197,7 @@ public class DuelManager {
                 List<Player> all = new ArrayList<>(teamA);
                 all.addAll(teamB); // 보통 teamB는 비어있게 넘기지만 안전하게 합침
 
-                // center가 정의되어 있으면 그 위치 사용, 아니면 아레나 중앙 추정
+
                 Location baseC = origin.clone().add(meta.center().dx(), meta.center().dy(), meta.center().dz());
                 baseC.add(0.5, 0, 0.5);
 
@@ -222,7 +225,6 @@ public class DuelManager {
             }
 
 
-            startTimeout(inst);
             startCountdown(inst);
 
             return true;
@@ -247,6 +249,7 @@ public class DuelManager {
 
             if (inst.type.equals("duel")) {
                 if (inst.teamA.isEmpty() || inst.teamB.isEmpty()) {
+                    inst.isShuttingDown = true;
                     endInternal(inst);
                     return;
                 }
@@ -284,6 +287,7 @@ public class DuelManager {
                 tpGroup(inst.teamB, baseB, 1);
             } else if (inst.type.equals("ffa")) {
                 if (inst.teamA.size() <= 1) {
+                    inst.isShuttingDown = true;
                     endInternal(inst);
                     return;
                 }
@@ -319,7 +323,6 @@ public class DuelManager {
             }
 
 
-            startTimeout(inst);
             startCountdown(inst);
         } catch (Exception e) {
             e.printStackTrace();
@@ -384,15 +387,25 @@ public class DuelManager {
         final int[] left = {3};
         inst.countdown = true;
 
-        new BukkitRunnable() {
+        for (Player p : dualUtil.getInstWatchersAndPlayers(inst)) {
+            dualUtil.setSidebar(p, inst);
+        }
+
+        BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
+                if (inst.isShuttingDown) {
+                    inst.countdown = false;
+                    this.cancel();
+                    return;
+                }
+
                 if (left[0] > 0) {
                     String title =
                             (left[0] == 3) ? "§e3" :
                                     (left[0] == 2) ? "§62" :
                                             "§c1";
-                    dualUtil.sendTitleToPlayers(inst, title, 0, 25, 0); // 예: p.sendTitle(title, "", 0, 20, 0);
+                    dualUtil.sendTitleToPlayers(inst, title, 0, 25, 0);
                     dualUtil.playSoundToPlayers(inst, Sound.UI_BUTTON_CLICK, 1.0f, 1.0f);
                     left[0]--;
                     return;
@@ -401,18 +414,34 @@ public class DuelManager {
                 dualUtil.sendTitleToPlayers(inst, "§bSTART!", 0, 10, 0); // 아쿠아
                 dualUtil.playSoundToPlayers(inst, Sound.ENTITY_ARROW_HIT_PLAYER, 1.0f, 1.0f);
                 inst.countdown = false;
+                startTimeout(inst);
                 this.cancel();
             }
         }.runTaskTimer(plugin, 0L, 20L);
+
+        inst.countdownTaskId = task.getTaskId();
     }
 
     private void startTimeout(Instance inst) {
-        long ticks10min = 10L * 60L * 20L;
+        inst.leftTime = 600;
 
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (inst.leftTime >= 0) {
+                    for (Player p : dualUtil.getInstWatchersAndPlayers(inst)) {
+                        dualUtil.setSidebar(p, inst);
+                    }
 
-        inst.timeoutTaskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    inst.leftTime--;
+                    return;
+                }
             checkRoundEnd(inst, true);
-        }, ticks10min).getTaskId();
+            this.cancel();
+            }
+        }.runTaskTimer(plugin, 0L, 20L);
+
+        inst.timeoutTaskId = task.getTaskId();
     }
 
 
@@ -432,19 +461,24 @@ public class DuelManager {
             inst.timeoutTaskId = -1;
         }
 
-        // 참여자 스냅샷 (null 대비)
-        List<Player> players = new ArrayList<>();
-        for (UUID id : inst.teamA) { Player p = Bukkit.getPlayer(id); if (p != null) players.add(p); }
-        for (UUID id : inst.teamB) { Player p = Bukkit.getPlayer(id); if (p != null) players.add(p); }
 
-        // 맵핑 제거는 나중에 한 번에
-        for (UUID id : inst.teamA) byPlayer.remove(id);
-        for (UUID id : inst.teamB) byPlayer.remove(id);
+        // 제거
+        for (UUID id : dualUtil.getInstPlayers(inst)) {
+            byPlayer.remove(id);
+            offlinePlayers.remove(id);
+        }
+
+        //관전자 제거
+        for (UUID id : inst.watchers) {
+            byPlayer.remove(id);
+        }
+
 
         // 관전자 해제 + 로비 이동
-        for (Player p : players) {
+        for (Player p : dualUtil.getInstWatchersAndPlayers(inst)) {
             setSpectator(p, false, inst);
-            ResetUtil.joinLobby(p); // TP/상태 초기화 유틸
+            ResetUtil.joinLobby(p);
+            dualUtil.clearSidebar(p);
         }
 
         // 아레나 공기화
@@ -526,10 +560,8 @@ public class DuelManager {
                     .collect(Collectors.toList());
         }
 
-        // 3) 그래도 없으면 전체 중 랜덤
-        if (list.isEmpty()) list = new ArrayList<>(all);
 
-        if (list.isEmpty()) return null; // 아예 등록된 아레나가 없음
+        if (list.isEmpty()) return null;
         int idx = ThreadLocalRandom.current().nextInt(list.size());
         return list.get(idx);
     }
@@ -549,7 +581,9 @@ public class DuelManager {
         if (inst == null) return;
 
         inst.eliminated.add(dead.getUniqueId());
-        setSpectator(dead, true, inst);
+        if (!offlinePlayers.contains(dead.getUniqueId())) {
+            setSpectator(dead, true, inst);
+        }
 
         String deathMessage;
         if (killer != null) {
@@ -558,7 +592,7 @@ public class DuelManager {
             deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + "사망했습니다");
         }
 
-        dualUtil.sendMessageToPlayers(deathMessage, dualUtil.getInstOnlinePlayers(inst));
+        dualUtil.sendMessageToPlayers(deathMessage, dualUtil.getInstWatchersAndPlayers(inst));
         checkRoundEnd(inst, false);
     }
 
@@ -571,12 +605,27 @@ public class DuelManager {
     private void checkRoundEnd(Instance inst, boolean isTimeout) {
 
         int top[] = {0, 0};
-        Set<UUID> winnerPlayers;
+        Set<UUID> winnerPlayers = new HashSet<>();
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
 
-        int countA = inst.teamA.size();
-        int countB = inst.teamB.size();
+
+        int onlineA = 0;
+        int onlineB = 0;
+
+        for (UUID id : dualUtil.getInstPlayers(inst)) {
+            if (offlinePlayers.contains(id)) {
+                continue;
+            }
+
+            if (inst.teamA.contains(id)) {
+                onlineA++;
+            }
+            if (inst.teamB.contains(id)) {
+                onlineB++;
+            }
+        }
+
 
         if (inst.type.equals("duel")) {
             if (aliveA == 0 || aliveB == 0) {
@@ -603,10 +652,8 @@ public class DuelManager {
                 winnerPlayers = checkRoundVictory(inst);
                 top = top2AllowDup(inst.scoreMap);
 
-                countA--;
-                countB = 1;
-            } else {
-                return;
+                onlineA--;
+                onlineB = -1;
             }
         } else {
             return;
@@ -614,25 +661,33 @@ public class DuelManager {
 
         if (isTimeout) {
             dualUtil.sendTitleToPlayers(inst, ChatColor.YELLOW + "무승부", 0, 20, 0);
+            dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1, 1);
         } else {
-            String message = "§6§l라운드 종료!\n§f" + top[0] + " §7-§f " + top[1] + "\n§r";
+            inst.top[0] = top[0];
+            inst.top[1] = top[1];
 
-            String joined = idsToPlayers(winnerPlayers).stream()
-                    .map(p -> {
-                        String name = p.getName();
-                        String status;
-                        if (inst.eliminated.contains(p.getUniqueId())) {
-                            status = "§cdead";
-                        } else {
-                            double hp = Math.max(0.0, p.getHealth());
-                            status = String.format("%.2f❤", hp);
-                        }
-                        return name + "§7(§c" + status + "§7)§r";
-                    })
-                    .collect(Collectors.joining("§r / §r"));
-
-            message += joined + " §a§l승리";
-            dualUtil.sendMessageToPlayers(message, dualUtil.getInstOnlinePlayers(inst));
+            for (Player p : dualUtil.getInstWatchersAndPlayers(inst)) {
+                dualUtil.setSidebar(p, inst);
+            }
+//
+//            String message = "§6§l라운드 종료!\n§f" + top[0] + " §7-§f " + top[1] + "\n§r";
+//
+//            String joined = idsToPlayers(winnerPlayers).stream()
+//                    .map(p -> {
+//                        String name = p.getName();
+//                        String status;
+//                        if (inst.eliminated.contains(p.getUniqueId())) {
+//                            status = "§cdead";
+//                        } else {
+//                            double hp = Math.max(0.0, p.getHealth());
+//                            status = String.format("%.2f❤", hp);
+//                        }
+//                        return name + "§7(§c" + status + "§7)§r";
+//                    })
+//                    .collect(Collectors.joining("§r / §r"));
+//
+//            message += joined + " §a§l승리";
+//            dualUtil.sendMessageToPlayers(message, dualUtil.getInstWatchersAndPlayers(inst));
             dualUtil.sendTitleToPlayers(inst, "§f" + top[0] + " §7-§f " + top[1], 0, 40, 0);
         }
 
@@ -645,8 +700,9 @@ public class DuelManager {
             inst.timeoutTaskId = -1;
         }
 
-        if ((top[0] == inst.roundSetting) || (countA == 0 || countB == 0) ) {
+        if ((top[0] == inst.roundSetting) || (onlineA == 0 || onlineB == 0) ) {
             checkVictory(inst);
+            inst.isShuttingDown = true;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 endInternal(inst);
             }, 100L);
@@ -655,6 +711,55 @@ public class DuelManager {
                 startRound(inst);
             }, 60L);
         }
+
+        for (UUID id : dualUtil.getInstPlayers(inst)) {
+            if (offlinePlayers.contains(id)) {
+                offlinePlayers.remove(id);
+                byPlayer.remove(id);
+
+                inst.teamA.remove(id);
+                inst.teamB.remove(id);
+            }
+        }
+    }
+
+
+
+    public void leaveDuel(Player p, Instance inst) {
+        int teamSize = 0;
+
+        if (inst.watchers.contains(p.getUniqueId())) {
+            setSpectator(p, false, inst);
+            inst.watchers.remove(p.getUniqueId());
+        } else {
+            if (inst.type.equals("duel")) {
+                if (inst.teamB.contains(p.getUniqueId())) {
+                    teamSize = inst.teamA.size();
+                } else {
+                    teamSize = inst.teamB.size();
+                }
+            } else {
+                teamSize = inst.teamA.size();
+                teamSize--;
+            }
+        }
+
+        if (teamSize > 1) {
+            eliminate(p, p.getKiller());
+            byPlayer.remove(p.getUniqueId());
+
+            inst.teamA.remove(p.getUniqueId());
+            inst.teamB.remove(p.getUniqueId());
+        } else if (teamSize == 1) {
+
+            offlinePlayers.add(p.getUniqueId());
+            eliminate(p, p.getKiller());
+            byPlayer.remove(p.getUniqueId());
+        }
+
+        p.setInvulnerable(false);
+        p.setAllowFlight(false);
+        dualUtil.clearSidebar(p);
     }
 
     private Set<UUID> checkRoundVictory(Instance inst) {

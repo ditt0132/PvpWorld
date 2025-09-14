@@ -3,7 +3,9 @@ package me.ujun.pvpWorld.listener;
 import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.config.ConfigHandler;
 import me.ujun.pvpWorld.duel.DuelManager;
+import me.ujun.pvpWorld.duel.Instance;
 import me.ujun.pvpWorld.util.ResetUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -37,7 +39,9 @@ public class JoinPvpWorldListener implements Listener {
 
         if (duel.isInDuel(player)) {
             if (event.getFrom().getName().equals("pvpworld_void")) {
-                duel.eliminate(player, null);
+                Instance inst = duel.getInstanceOf(player);
+
+                duel.leaveDuel(player, inst);
             } else {
                 return;
             }

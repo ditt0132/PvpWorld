@@ -84,18 +84,24 @@ public final class PvpWorld extends JavaPlugin {
 
 
     private void registerCommands() {
+        CommandTabCompleter commandTabCompleter = new CommandTabCompleter(duelManager);
+
         getCommand("lobby").setExecutor(new LobbyCMD());
         getCommand("pvpworld").setExecutor(new PvpWorldCMD(this, kitManager, kitsFile, arenaManager, arenasFile));
         getCommand("ffa").setExecutor(new FfaCMD(kitManager));
         getCommand("duel").setExecutor(new DuelCMD(kitManager, duelManager));
         getCommand("party").setExecutor(new PartyCMD(kitManager, duelManager));
         getCommand("forceduel").setExecutor(new ForceDuelCMD(kitManager, duelManager));
+        getCommand("duelwatch").setExecutor(new DuelWatchCMD(duelManager));
+        getCommand("leave").setExecutor(new LeaveCMD(duelManager));
+
         getCommand("lobby").setTabCompleter(new CommandTabCompleter());
-        getCommand("pvpworld").setTabCompleter(new CommandTabCompleter());
-        getCommand("ffa").setTabCompleter(new CommandTabCompleter());
-        getCommand("duel").setTabCompleter(new CommandTabCompleter());
-        getCommand("party").setTabCompleter(new CommandTabCompleter());
-        getCommand("forceduel").setTabCompleter(new CommandTabCompleter());
+        getCommand("pvpworld").setTabCompleter(commandTabCompleter);
+        getCommand("ffa").setTabCompleter(commandTabCompleter);
+        getCommand("duel").setTabCompleter(commandTabCompleter);
+        getCommand("party").setTabCompleter(commandTabCompleter);
+        getCommand("forceduel").setTabCompleter(commandTabCompleter);
+        getCommand("duelwatch").setTabCompleter(commandTabCompleter);
     }
 
     private void registerListeners() {

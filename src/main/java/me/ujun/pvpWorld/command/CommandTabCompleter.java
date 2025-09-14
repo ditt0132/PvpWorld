@@ -2,6 +2,7 @@ package me.ujun.pvpWorld.command;
 
 import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.arena.ArenaManager;
+import me.ujun.pvpWorld.duel.DuelManager;
 import me.ujun.pvpWorld.kit.KitManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -17,6 +18,11 @@ import java.util.stream.Collectors;
 
 public class CommandTabCompleter implements TabCompleter {
 
+    private final DuelManager duel;
+
+    public CommandTabCompleter(DuelManager duel) {
+        this.duel = duel;
+    }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -96,6 +102,8 @@ public class CommandTabCompleter implements TabCompleter {
                     return prefixed(KitManager.kits.keySet().stream().toList(), args[2]);
                 }
             }
+        } else if (command.getName().equals("duelwatch")) {
+            return prefixed(getDuelOnlinePlayerNames(), args[0]);
         }
 
 
@@ -103,6 +111,12 @@ public class CommandTabCompleter implements TabCompleter {
 
     }
 
+    private List<String> getDuelOnlinePlayerNames() {
+        return  Bukkit.getOnlinePlayers().stream()
+                .filter(duel::isInDuel)
+                .map(Player::getName)                  // 이름만 추출
+                .collect(Collectors.toList());
+    }
 
     private List<String> getOnlinePlayerNames() {
         return Bukkit.getOnlinePlayers().stream()

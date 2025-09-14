@@ -236,14 +236,16 @@ public class DuelListener implements Listener {
 
         Instance inst = duel.getInstanceOf(player);
 
-        if (!duel.spectators.contains(player.getUniqueId())) {
-            duel.eliminate(player, player.getKiller());
-            duel.setSpectator(player, false, inst);
+        if (inst.watchers.contains(player.getUniqueId())) {
+            ResetUtil.joinLobby(player);
+            return;
         }
 
-        inst.teamA.remove(player.getUniqueId());
-        inst.teamB.remove(player.getUniqueId());
 
-        duel.byPlayer.remove(player.getUniqueId());
+        duel.offlinePlayers.add(player.getUniqueId());
+
+        if (!duel.spectators.contains(player.getUniqueId())) {
+            duel.eliminate(player, player.getKiller());
+        }
     }
 }
