@@ -758,8 +758,10 @@ public class DuelManager {
             byPlayer.remove(p.getUniqueId());
         }
 
-        p.setInvulnerable(false);
-        p.setAllowFlight(false);
+        if (p.getGameMode().equals(GameMode.ADVENTURE) || p.getGameMode().equals(GameMode.SURVIVAL)) {
+            p.setInvulnerable(false);
+            p.setAllowFlight(false);
+        }
         dualUtil.clearSidebar(p);
     }
 

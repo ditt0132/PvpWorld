@@ -38,8 +38,6 @@ public class DuelUtil {
         Set<UUID> instPlayers = new HashSet<>();
         instPlayers.addAll(inst.teamA);
         instPlayers.addAll(inst.teamB);
-        instPlayers.addAll(inst.watchers);
-
         return instPlayers;
     }
 
@@ -148,9 +146,11 @@ public class DuelUtil {
     }
 
     public void clearSidebar(Player player) {
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard empty = manager.getNewScoreboard();
-        player.setScoreboard(empty);
+        Scoreboard board = player.getScoreboard();
+        Objective obj = board.getObjective(DisplaySlot.SIDEBAR);
+        if (obj != null) {
+            obj.unregister();
+        }
     }
 
 
