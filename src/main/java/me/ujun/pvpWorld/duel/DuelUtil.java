@@ -197,15 +197,42 @@ public class DuelUtil {
         sidebar.add(Component.text(""));
         sidebar.add(Component.text("Opponent: ").color(textColor));
 
-        for (UUID id : opponentSet) {
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
-            String healthInfo = "§cdead";
-            if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
-                Player player = (Player) offlinePlayer;
-                healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+        if (inst.watchers.contains(p.getUniqueId())) {
+            for (UUID id : inst.teamA) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
+                String healthInfo = "§cdead";
+                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
+                    Player player = (Player) offlinePlayer;
+                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+                }
+
+                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
             }
 
-            sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append( Component.text(" " + healthInfo)));
+            sidebar.add(Component.text("vs").color(textColor));
+
+            for (UUID id : inst.teamB) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
+                String healthInfo = "§cdead";
+                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
+                    Player player = (Player) offlinePlayer;
+                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+                }
+
+                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
+            }
+
+        } else {
+            for (UUID id : opponentSet) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
+                String healthInfo = "§cdead";
+                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
+                    Player player = (Player) offlinePlayer;
+                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+                }
+
+                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
+            }
         }
 
         Score score;

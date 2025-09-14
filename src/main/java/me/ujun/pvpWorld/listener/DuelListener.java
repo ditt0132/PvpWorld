@@ -44,6 +44,7 @@ public class DuelListener implements Listener {
         Player p = e.getPlayer();
 
         if (!duel.isInDuel(p)) return;
+        if (!duel.spectators.contains(p.getUniqueId())) return;
 
         Instance inst = duel.getInstanceOf(p);
         if (inst.countdown) e.setCancelled(true);
