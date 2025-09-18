@@ -57,7 +57,7 @@ public class BlockCommandListener implements Listener {
         }
 
         GameMode from = player.getGameMode();
-        GameMode to   = event.getNewGameMode();
+        GameMode to  = event.getNewGameMode();
 
         boolean fromSurvOrAdv = (from == GameMode.SURVIVAL || from == GameMode.ADVENTURE);
         boolean toCreativeOrSpec = (to == GameMode.CREATIVE || to == GameMode.SPECTATOR);

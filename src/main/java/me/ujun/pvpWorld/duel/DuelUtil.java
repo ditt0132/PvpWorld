@@ -10,6 +10,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 import org.bukkit.util.ChatPaginator;
 
@@ -17,6 +18,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DuelUtil {
+
+    private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+
 
     public void sendMessageToPlayers(String message, List<Player> players) {
 
@@ -146,50 +150,41 @@ public class DuelUtil {
     }
 
     public void clearSidebar(Player player) {
-        Scoreboard board = player.getScoreboard();
-        Objective obj = board.getObjective(DisplaySlot.SIDEBAR);
-        if (obj != null) {
-            obj.unregister();
-        }
+        ScoreboardManager manager = Bukkit.getScoreboardManager();
+        Scoreboard mainBoard = manager.getMainScoreboard();
+
+        player.setScoreboard(mainBoard);
+        scoreboardMap.remove(player);
     }
 
 
     public void setSidebar(Player p, Instance inst) {
+
         ScoreboardManager manager = Bukkit.getScoreboardManager();
-        Scoreboard board = manager.getNewScoreboard();
+        if (!scoreboardMap.containsKey(p)) {
+            Scoreboard board = manager.getNewScoreboard();
 
-        Objective objective = board.registerNewObjective("pvpworld_sidebar", "dummy",
-                Component.text("§6§l[ 듀얼 ]"));
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+            Objective objective = board.registerNewObjective("pvpworld_sidebar", "dummy",
+                    Component.text("§6§l[ 듀얼 ]"));
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+            Objective belowNameObjective = board.registerNewObjective("pvpworld_belowname", "health",
+                    Component.text("§c❤"));
+            belowNameObjective.setDisplaySlot(DisplaySlot.BELOW_NAME);
 
-
-        int m = inst.leftTime / 60;
-        int s1 = (inst.leftTime % 60) / 10;
-        int s2 = (inst.leftTime % 60) % 10;
-
-        String timer = m + ":" + s1 + s2;
-
-
-        Set<UUID> opponentSet = new HashSet<>();
-
-        if (inst.type.equals("duel")) {
-            if (inst.teamA.contains(p.getUniqueId())) {
-                opponentSet = inst.teamB;
-            }
-
-            if (inst.teamB.contains(p.getUniqueId())) {
-                opponentSet = inst.teamA;
-            }
-        } else if (inst.type.equals("ffa")) {
-            opponentSet = inst.teamA;
-            opponentSet.remove(p.getUniqueId());
+            p.setScoreboard(board);
+            scoreboardMap.put(p, board);
         }
+
+        Scoreboard board = scoreboardMap.get(p);
+        Objective objective = board.getObjective("pvpworld_sidebar");
+
+        String leftTimer = String.format("%d:%02d", inst.leftTime / 60, inst.leftTime % 60);
 
         TextColor textColor = TextColor.color(244, 164, 96);
         List<Component> sidebar = new ArrayList<>();
 
         sidebar.add(Component.text("Kit: ").color(textColor).append(Component.text(inst.kit.getDisplayName()).color(NamedTextColor.WHITE)));
-        sidebar.add(Component.text("Time left: ").color(textColor).append(Component.text(timer).color(NamedTextColor.WHITE)));
+        sidebar.add(Component.text("Time left: ").color(textColor).append(Component.text(leftTimer).color(NamedTextColor.WHITE)));
         sidebar.add(Component.text("First to ").color(textColor).append(Component.text(inst.roundSetting).color(NamedTextColor.WHITE)));
         sidebar.add(Component.text(""));
         sidebar.add(Component.text("Score:").color(textColor));
@@ -197,41 +192,19 @@ public class DuelUtil {
         sidebar.add(Component.text(""));
         sidebar.add(Component.text("Opponent: ").color(textColor));
 
+
         if (inst.watchers.contains(p.getUniqueId())) {
             for (UUID id : inst.teamA) {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
-                String healthInfo = "§cdead";
-                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
-                    Player player = (Player) offlinePlayer;
-                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
-                }
-
-                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
+                sidebar.add(formatPlayerHealth(inst, id));
             }
-
             sidebar.add(Component.text("vs").color(textColor));
-
             for (UUID id : inst.teamB) {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
-                String healthInfo = "§cdead";
-                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
-                    Player player = (Player) offlinePlayer;
-                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
-                }
-
-                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
+                sidebar.add(formatPlayerHealth(inst, id));
             }
-
         } else {
-            for (UUID id : opponentSet) {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
-                String healthInfo = "§cdead";
-                if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
-                    Player player = (Player) offlinePlayer;
-                    healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
-                }
-
-                sidebar.add(Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo)));
+            Set<UUID> opponentTeam = inst.teamA.contains(p.getUniqueId()) ? inst.teamB : inst.teamA;
+            for (UUID id : opponentTeam) {
+                sidebar.add(formatPlayerHealth(inst, id));
             }
         }
 
@@ -243,7 +216,27 @@ public class DuelUtil {
             score.numberFormat(NumberFormat.blank());
             score.customName(sidebar.get(i));
         }
-
-        p.setScoreboard(board);
     }
+
+    private Component formatPlayerHealth(Instance inst, UUID id) {
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
+        String healthInfo = "§cdead";
+        if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
+            Player player = (Player) offlinePlayer;
+            healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+        }
+
+        return Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo));
+    }
+
+
 }
+
+//            if (inst.countdown) {
+//                inst.countdown = false; //카운트다운 중이면 데미지 안받으니까 카운트다운 아니라고 구라 치기
+//                p.damage(0.01); //데미지 조금 주기
+//                inst.countdown = true; //다시 카운트다운으로 되돌리기
+//                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+//                    p.setHealth(p.getMaxHealth());
+//                }, 2L); //2틱 뒤에 플레이어 체력 원상복귀하기(딜레이 준 이유는 너무 빠르면 반영 안됨)
+//            }

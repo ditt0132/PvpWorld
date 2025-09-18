@@ -73,7 +73,6 @@ public class ForceDuelCMD implements CommandExecutor {
         }
 
         player.sendMessage("§a§l" + target.getName() + "§f§l님에게 강제 듀얼을 실행했습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + roundSetting + "§f§l)");
-        // 클릭 수락 메시지
         Component msg = Component.text(player.getName(), NamedTextColor.RED, TextDecoration.BOLD)
                 .append(Component.text("님에게 강제 듀얼을 실행받았습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + String.valueOf(roundSetting) + "§f§l)", NamedTextColor.WHITE, TextDecoration.BOLD));
         target.sendMessage(msg);

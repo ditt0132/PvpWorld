@@ -40,8 +40,9 @@ public class KitsFile {
             ConfigurationSection sec = root.createSection(kit.getName());
             sec.set("display", kit.getDisplayName());
             sec.set("type", kit.getType());
+            sec.set("time", kit.getDuelTime());
             sec.set("items", kit.getContents());
-            Bukkit.getLogger().info(kit.getName());
+//            Bukkit.getLogger().info(kit.getName());
         }
 
         try {
@@ -66,6 +67,7 @@ public class KitsFile {
 
             String display = sec.getString("display", key);
             String type = sec.getString("type", "default");
+            int time = sec.getInt("time", 600);
             List<?> list = sec.getList("items", Collections.emptyList());
 
             ItemStack[] arr = new ItemStack[Kit.GUI_SIZE];
@@ -74,7 +76,7 @@ public class KitsFile {
                 if (o instanceof ItemStack) arr[i] = (ItemStack) o;
             }
 
-            KitManager.kits.put(key.toLowerCase(Locale.ROOT), new Kit(key, display, type, arr));
+            KitManager.kits.put(key.toLowerCase(Locale.ROOT), new Kit(key, display, type, arr, time));
         }
 
         Bukkit.getLogger().info("Loaded kits: " + KitManager.kits.size());

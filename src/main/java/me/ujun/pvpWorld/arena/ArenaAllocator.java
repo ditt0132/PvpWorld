@@ -37,13 +37,13 @@ public class ArenaAllocator {
 
 
         public void release(int slotIndex) {
-            // 중복 반납 방지
             if (inUse.remove(slotIndex)) {
                 free.offer(slotIndex);
             }
         }
 
 
+        // 청크 로드하는 건데 쓸모 있을 지는 몰?루
         public void warmup(World w, Allocation alloc, int sizeX, int sizeZ) {
 
             int minCX = alloc.origin.getBlockX() >> 4;
@@ -66,7 +66,6 @@ public class ArenaAllocator {
             return new Location(w, ox, baseY, oz);
         }
 
-        /** 대여 결과 */
         public static final class Allocation {
             public final int slotIndex;
             public final Location origin;

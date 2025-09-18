@@ -25,11 +25,9 @@ public class JoinPvpWorldListener implements Listener {
         Player player = event.getPlayer();
 
 
-        if (!ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
-            return;
+        if (ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
+            ResetUtil.joinLobby(player);
         }
-
-        ResetUtil.joinLobby(player);
     }
 
     @EventHandler
@@ -41,7 +39,9 @@ public class JoinPvpWorldListener implements Listener {
             if (event.getFrom().getName().equals("pvpworld_void")) {
                 Instance inst = duel.getInstanceOf(player);
 
-                duel.leaveDuel(player, inst);
+                if (!inst.isShuttingDown) {
+                    duel.leaveDuel(player, inst);
+                }
             } else {
                 return;
             }

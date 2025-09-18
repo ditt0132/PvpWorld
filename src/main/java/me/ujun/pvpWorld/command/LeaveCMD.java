@@ -30,13 +30,19 @@ public class LeaveCMD implements CommandExecutor {
             return false;
         }
 
+
         Instance inst = duel.getInstanceOf(player);
+
+        if (inst.isShuttingDown) {
+            player.sendMessage("이미 게임이 종료되는 중입니다");
+            return false;
+        }
 
         if (inst.watchers.contains(player.getUniqueId())) {
             player.sendMessage("관전을 종료했습니다");
-            ResetUtil.joinLobby(player);
+            duel.leaveDuel(player, inst);
         } else {
-            ResetUtil.joinLobby(player);
+            duel.leaveDuel(player, inst);
         }
 
         return true;

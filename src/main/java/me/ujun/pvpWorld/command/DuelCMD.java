@@ -80,7 +80,7 @@ public class DuelCMD implements CommandExecutor {
                 return false;
             }
 
-            // 수락 → 인박스 정리
+
             map.remove(from.getUniqueId());
             if (map.isEmpty()) inbox.remove(player.getUniqueId());
 
@@ -113,7 +113,6 @@ public class DuelCMD implements CommandExecutor {
 
 
 
-            // 수락 → 인박스 정리
             map.remove(from.getUniqueId());
             if (map.isEmpty()) inbox.remove(player.getUniqueId());
 
@@ -154,7 +153,6 @@ public class DuelCMD implements CommandExecutor {
                 .put(player.getUniqueId(), new Invite(player.getUniqueId(), target.getUniqueId(), kit.getName(), roundSetting, System.currentTimeMillis() + EXPIRE_MILLIS));
 
         player.sendMessage("§a§l" + target.getName() + "§f§l님에게 듀얼 신청 보냈습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + roundSetting + "§f§l)");
-        // 클릭 수락 메시지
         Component msg = Component.text(player.getName(), NamedTextColor.AQUA, TextDecoration.BOLD)
                 .append(Component.text("님에게 듀얼 신청을 받았습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + String.valueOf(roundSetting) + "§f§l)", NamedTextColor.WHITE, TextDecoration.BOLD))
                 .append(Component.text("\n\n[수락하기]", NamedTextColor.GREEN,  TextDecoration.BOLD)

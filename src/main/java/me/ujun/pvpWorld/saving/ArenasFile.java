@@ -34,7 +34,7 @@ public class ArenasFile {
         this.kitManager = kitManager;
     }
 
-    /* ------------ 저장 ------------ */
+
     public void save() {
         // 섹션 초기화 후 다시 씀
         config.set("arenas", null);
@@ -72,7 +72,7 @@ public class ArenasFile {
         config.set(path + ".pitch", p.pitch());
     }
 
-    /* ------------ 로드 ------------ */
+
     public void load() {
         ArenaManager.arenas.clear();
         PvpWorld.ffaSpawnLocations.clear();

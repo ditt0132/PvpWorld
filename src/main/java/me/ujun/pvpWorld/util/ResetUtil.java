@@ -2,6 +2,7 @@ package me.ujun.pvpWorld.util;
 
 import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.config.ConfigHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -26,6 +27,7 @@ public class ResetUtil {
     }
 
 
+    //심한욕
     public static void resetAllAttributes(Player player) {
         player.getAttribute(Attribute.GENERIC_LUCK).setBaseValue(0);
         player.getAttribute(Attribute.GENERIC_ARMOR).setBaseValue(0);
@@ -68,12 +70,15 @@ public class ResetUtil {
 
         player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 10000000, 255, true, false, false));
 
-        if (ConfigHandler.lobby != null) {
-            player.teleport(ConfigHandler.lobby);
-        }
-
         if (!PvpWorld.devPlayers.contains(player.getUniqueId())) {
             player.setGameMode(GameMode.ADVENTURE);
         }
+
+        if (ConfigHandler.lobby != null) {
+            player.teleport(ConfigHandler.lobby);
+        } else {
+            player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+        }
+
     }
 }

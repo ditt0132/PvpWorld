@@ -26,6 +26,8 @@ import java.util.zip.GZIPOutputStream;
 public final class WeHelper {
     private WeHelper() {}
 
+    //월엣 어케 쓰는지 몰라서 다 복붙해온겁니다 ㅈㅅㅈㅅ
+
     public static Region requireSelection(org.bukkit.entity.Player bukkit)
             throws IncompleteRegionException {
         com.sk89q.worldedit.entity.Player we = BukkitAdapter.adapt(bukkit);

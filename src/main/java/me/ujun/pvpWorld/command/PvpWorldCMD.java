@@ -26,16 +26,13 @@ public class PvpWorldCMD implements CommandExecutor {
     private final KitManager kitManager;
     private final KitsFile kitsFile;
     private final ArenaManager arenaManager;
-    private final ArenasFile arenasFile;
 
 
-    public PvpWorldCMD(JavaPlugin plugin, KitManager kitManager, KitsFile kitsFile, ArenaManager arenaManager, ArenasFile arenasFile) {
+    public PvpWorldCMD(JavaPlugin plugin, KitManager kitManager, KitsFile kitsFile, ArenaManager arenaManager) {
         this.plugin = plugin;
         this.kitManager = kitManager;
         this.kitsFile = kitsFile;
         this.arenaManager = arenaManager;
-        this.arenasFile = arenasFile;
-
     }
 
     @Override
@@ -185,6 +182,15 @@ public class PvpWorldCMD implements CommandExecutor {
                     String newType = args[4];
                     kit.setType(newType);
                     player.sendMessage(ChatColor.GREEN + "유형을 " + newType + "으로 변경했습니다.");
+                } else if (kitEditSubCommand.equals("time")) {
+                    if (args.length < 5) {
+                        return false;
+                    }
+
+                    int newTime = Integer.parseInt(args[4]);
+                    kit.setDuelTime(newTime);
+                    player.sendMessage(ChatColor.GREEN + "제한 시간을 " + newTime + "으로 변경했습니다.");
+
                 } else {
                     return false;
                 }

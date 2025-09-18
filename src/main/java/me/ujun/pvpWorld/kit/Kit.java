@@ -14,16 +14,18 @@ import java.util.Objects;
 public class Kit {
     private final String name;
     private String displayName;
-    private String type = "default";
+    private String type;
     private ItemStack[] contents;
+    private int duelTime = 600;
 
     public static final int GUI_SIZE = 54;
 
-    public Kit(String name, String displayName, String type, ItemStack[] contents) {
+    public Kit(String name, String displayName, String type, ItemStack[] contents, int time) {
         this.name = name;
         this.displayName = displayName;
         this.type = type;
         this.contents = normalize(contents);
+        this.duelTime = time;
     }
 
     public String getName() { return name; }
@@ -32,6 +34,8 @@ public class Kit {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
     public ItemStack[] getContents() { return contents; }
+    public int getDuelTime() { return duelTime; }
+    public void setDuelTime(int time) { this.duelTime = time; }
     public void setContents(ItemStack[] contents) { this.contents = normalize(contents); }
 
     public Inventory createEditorInventory() {

@@ -28,9 +28,9 @@ public class Instance {
     public int leftTime = 600;
 
     public final int sx, sy, sz;
-    public volatile boolean countdown = true; // ⬅ 카운트다운 중 여부
-    public int countdownTaskId = -1;          // ⬅ 3초 타이머
-    public int timeoutTaskId = -1;          // ⬅ 10분 타이머
+    public volatile boolean countdown = true; // 카운트다운 중 여부
+    public int countdownTaskId = -1;          // 카운트 다운 타이머
+    public int timeoutTaskId = -1;          // 경기 타이머
 
     public Instance(Kit kit, Location origin, int sx, int sy, int sz, String type, int roundSetting, ArenaMeta meta, boolean party) {
         this.kit = kit;

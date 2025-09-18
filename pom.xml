@@ -6,7 +6,7 @@
 
     <groupId>me.ujun</groupId>
     <artifactId>PvpWorld</artifactId>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <packaging>jar</packaging>
 
     <name>PvpWorld</name>
@@ -59,7 +59,7 @@
                                     <artifactId>${project.artifactId}</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
-                                    <outputDirectory>E:\마크\서버\플긴 테스트 (paper) 25575\plugins</outputDirectory>
+                                    <outputDirectory>${outputDir}</outputDirectory>
                                     <destFileName>${project.build.finalName}.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>

@@ -87,7 +87,7 @@ public final class PvpWorld extends JavaPlugin {
         CommandTabCompleter commandTabCompleter = new CommandTabCompleter(duelManager);
 
         getCommand("lobby").setExecutor(new LobbyCMD());
-        getCommand("pvpworld").setExecutor(new PvpWorldCMD(this, kitManager, kitsFile, arenaManager, arenasFile));
+        getCommand("pvpworld").setExecutor(new PvpWorldCMD(this, kitManager, kitsFile, arenaManager));
         getCommand("ffa").setExecutor(new FfaCMD(kitManager));
         getCommand("duel").setExecutor(new DuelCMD(kitManager, duelManager));
         getCommand("party").setExecutor(new PartyCMD(kitManager, duelManager));

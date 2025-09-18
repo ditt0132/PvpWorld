@@ -27,7 +27,7 @@ public class KitManager {
 
     public Kit createEmpty(String name, String displayName) {
         String key = name.toLowerCase(Locale.ROOT);
-        Kit k = new Kit(key, displayName, "default",  new ItemStack[Kit.GUI_SIZE]);
+        Kit k = new Kit(key, displayName, "default",  new ItemStack[Kit.GUI_SIZE], 600);
         kits.put(key, k);
         return k;
     }

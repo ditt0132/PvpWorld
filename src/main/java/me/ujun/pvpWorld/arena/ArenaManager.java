@@ -37,7 +37,7 @@ public class ArenaManager {
     public void cancel(UUID uid) { pending.remove(uid); }
     public Pending getPending(UUID uid) { return pending.get(uid); }
 
-    /** 현재 플레이어 위치를 WE 선택 최소점 기준 상대좌표로 마크 */
+    // 현재 플레이어 위치를 WE 선택 최소점 기준 상대좌표로 마크
     public boolean mark(UUID uid, org.bukkit.entity.Player p, String which) {
         Pending pend = pending.get(uid);
         if (pend == null) return false;
@@ -71,7 +71,7 @@ public class ArenaManager {
         return ((int)Math.floor((a + 45f) / 90f) % 4) * 90; // 0,90,180,270
     }
 
-    /** WE 선택 → .schem 저장 + arenas.yml 메타 등록 */
+    // WE 선택 → .schem 저장 + arenas.yml 메타 등록
     public boolean register(UUID uid, org.bukkit.entity.Player p, String type) {
         Pending pend = pending.get(uid);
         if (pend == null) return false;

@@ -20,8 +20,6 @@ public class ConfigHandler {
     public static Location lobby;
     public static List<String> allowedCommandsInPvpWorld = new ArrayList<>();
 
-
-
     public ConfigHandler(JavaPlugin plugin) {
         this.plugin = plugin;
     }

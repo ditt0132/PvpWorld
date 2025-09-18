@@ -24,6 +24,7 @@ public class CommandTabCompleter implements TabCompleter {
         this.duel = duel;
     }
 
+    //끔찍한 자동완성
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -74,7 +75,7 @@ public class CommandTabCompleter implements TabCompleter {
                     if (args[1].equals("apply")) {
                         return prefixed(KitManager.kits.keySet().stream().toList(), args[3]);
                     } else if (args[1].equals("edit")) {
-                        return prefixed(Arrays.asList("name", "type", "inventory"), args[3]);
+                        return prefixed(Arrays.asList("name", "type", "inventory", "time"), args[3]);
                     }
                 }
             }

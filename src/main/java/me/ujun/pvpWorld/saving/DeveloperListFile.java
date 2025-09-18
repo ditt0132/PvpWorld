@@ -15,7 +15,7 @@ public class DeveloperListFile {
 
     public DeveloperListFile(File dataFolder) {
         if (!dataFolder.exists()) {
-            dataFolder.mkdirs(); // 폴더 먼저 생성
+            dataFolder.mkdirs();
         }
 
         this.file = new File(dataFolder, "developers.yml");

@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// 솔직히 난잡하긴 한데 기능이 많아서 킹쩔수가 없다
+// 미래의 내게 맡긴다
 public class PartyCMD implements CommandExecutor {
 
     public static Map<UUID, Set<UUID>> partys = new HashMap<>(); //파티용 맵
@@ -167,7 +169,7 @@ public class PartyCMD implements CommandExecutor {
             party.remove(p.getUniqueId());
             partyLeaderMap.remove(p.getUniqueId());
             partys.put(partyLeaderId, party);
-        } else if (subCommand.equals("invite")) { // ---------- 초대 ----------
+        } else if (subCommand.equals("invite")) {
             if (!partys.containsKey(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티 리더만 초대할 수 있습니다");
                 return true;
@@ -225,7 +227,7 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 리더 파티 유효성 확인
+
             Set<UUID> party = partys.get(leader.getUniqueId());
             if (party == null) {
                 p.sendMessage("§c해당 리더의 파티가 존재하지 않습니다");
@@ -234,19 +236,20 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 가입
+
             party.add(p.getUniqueId());
             partyLeaderMap.put(p.getUniqueId(), leader.getUniqueId());
 
-            // 안내
-            Player l = leader;
-            if (l != null) l.sendMessage("§a" + p.getName() + "§f님이 파티 초대를 수락했습니다");
+
+
+            leader.sendMessage("§a" + p.getName() + "§f님이 파티 초대를 수락했습니다");
             for (UUID id : party) {
                 Player pp = Bukkit.getPlayer(id);
                 if (pp != null) pp.sendMessage("§e" + p.getName() + "§f님이 파티에 합류했습니다");
             }
 
-            // 인박스 정리
+
+
             map.remove(leader.getUniqueId());
             if (map.isEmpty()) inbox.remove(p.getUniqueId());
             return true;
@@ -256,20 +259,20 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 내 인박스 확인
+
             Map<UUID, Invite> map = inbox.get(p.getUniqueId());
             if (map == null || map.isEmpty()) {
                 p.sendMessage("§c대기 중인 초대가 없습니다");
                 return true;
             }
 
-            // 리더 찾기 (온라인 우선, 없으면 인박스 키들로 오프로 매칭)
+
+
             String targetName = args[1];
             Player leaderOnline = Bukkit.getPlayerExact(targetName);
             UUID leaderId = (leaderOnline != null) ? leaderOnline.getUniqueId() : null;
 
             if (leaderId == null) {
-                // 인박스에 있는 리더들 중 이름 일치하는 UUID 찾기
                 String needle = targetName.toLowerCase(Locale.ROOT);
                 for (UUID id : map.keySet()) {
                     String name = Bukkit.getOfflinePlayer(id).getName();
@@ -298,7 +301,6 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 거절 처리
             map.remove(leaderId);
             if (map.isEmpty()) inbox.remove(p.getUniqueId());
 
@@ -502,13 +504,10 @@ public class PartyCMD implements CommandExecutor {
             }
 
 
-            // 안내
-
             leader.sendMessage("§a" + p.getName() + "§f님이 듀얼 신청을 수락했습니다");
 
 
             duelManager.startDuel(teamA, teamB, duelRequest.kit, duelRequest.roundSetting, true);
-            // 인박스 정리
             map.remove(leader.getUniqueId());
             if (map.isEmpty()) duelInbox.remove(p.getUniqueId());
             return true;
@@ -517,14 +516,13 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 내 인박스 확인
             Map<UUID, DuelRequest> map = duelInbox.get(p.getUniqueId());
             if (map == null || map.isEmpty()) {
                 p.sendMessage("§c대기 중인 듀얼 신청이 없습니다");
                 return true;
             }
 
-            // 리더 찾기 (온라인 우선, 없으면 인박스 키들로 오프로 매칭)
+
             String targetName = args[1];
             Player leaderOnline = Bukkit.getPlayerExact(targetName);
 
@@ -546,7 +544,7 @@ public class PartyCMD implements CommandExecutor {
                 return true;
             }
 
-            // 거절 처리
+
             map.remove(leaderOnline.getUniqueId());
             if (map.isEmpty()) duelInbox.remove(p.getUniqueId());
 
@@ -591,7 +589,7 @@ public class PartyCMD implements CommandExecutor {
         return ids.stream()
                 .map(id -> {
                     var op = Bukkit.getOfflinePlayer(id);
-                    String name = op.getName();       // null일 수 있음(한 번도 접속 안했을 때 등)
+                    String name = op.getName();
                     return (name != null) ? name : id.toString().substring(0, 8);
                 })
                 .sorted(String.CASE_INSENSITIVE_ORDER)

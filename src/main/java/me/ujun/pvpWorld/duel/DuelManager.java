@@ -246,6 +246,7 @@ public class DuelManager {
             WeHelper.paste(cb, w, origin, false);
             Bukkit.getLogger().info(inst.meta.display() + " " + origin);
             removeArenaEntities(w, inst);
+            inst.isShuttingDown = false;
 
             if (inst.type.equals("duel")) {
                 if (inst.teamA.isEmpty() || inst.teamB.isEmpty()) {
@@ -388,6 +389,7 @@ public class DuelManager {
         inst.countdown = true;
 
         for (Player p : dualUtil.getInstWatchersAndPlayers(inst)) {
+            inst.leftTime = inst.kit.getDuelTime();
             dualUtil.setSidebar(p, inst);
         }
 
@@ -423,7 +425,7 @@ public class DuelManager {
     }
 
     private void startTimeout(Instance inst) {
-        inst.leftTime = 600;
+        inst.leftTime = inst.kit.getDuelTime();
 
         BukkitTask task = new BukkitRunnable() {
             @Override
@@ -605,7 +607,7 @@ public class DuelManager {
     private void checkRoundEnd(Instance inst, boolean isTimeout) {
 
         int top[] = {0, 0};
-        Set<UUID> winnerPlayers = new HashSet<>();
+//        Set<UUID> winnerPlayers = new HashSet<>();
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
 
@@ -629,11 +631,8 @@ public class DuelManager {
 
         if (inst.type.equals("duel")) {
             if (aliveA == 0 || aliveB == 0) {
-                for (Player p : dualUtil.getInstOnlinePlayers(inst)) {
-                    p.setInvulnerable(true);
-                }
 
-                winnerPlayers = checkRoundVictory(inst);
+                checkRoundVictory(inst);
 
                 if (inst.party) {
                     int teamAVictoryCount = inst.partyScoreMap.get("teamA");
@@ -644,12 +643,10 @@ public class DuelManager {
                 } else {
                     top = top2AllowDup(inst.scoreMap);
                 }
-            } else {
-                return;
             }
         } else if (inst.type.equals("ffa")) {
             if (aliveA <= 1) {
-                winnerPlayers = checkRoundVictory(inst);
+                checkRoundVictory(inst);
                 top = top2AllowDup(inst.scoreMap);
 
                 onlineA--;
@@ -659,9 +656,14 @@ public class DuelManager {
             return;
         }
 
+
+//        Bukkit.getLogger().info(aliveA + " | " + aliveB);
+        if ( (aliveA > 0 && aliveB > 0 ) && !isTimeout) {
+            return;
+        }
         if (isTimeout) {
             dualUtil.sendTitleToPlayers(inst, ChatColor.YELLOW + "무승부", 0, 20, 0);
-            dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_BASEDRUM, 1, 1);
+            dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_BASS, 1, 1);
         } else {
             inst.top[0] = top[0];
             inst.top[1] = top[1];
@@ -700,9 +702,9 @@ public class DuelManager {
             inst.timeoutTaskId = -1;
         }
 
-        if ((top[0] == inst.roundSetting) || (onlineA == 0 || onlineB == 0) ) {
+        inst.isShuttingDown = true;
+        if ((top[0] == inst.roundSetting) || (onlineA == 0 || onlineB == 0)) {
             checkVictory(inst);
-            inst.isShuttingDown = true;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 endInternal(inst);
             }, 100L);
@@ -762,33 +764,34 @@ public class DuelManager {
             p.setInvulnerable(false);
             p.setAllowFlight(false);
         }
+        ResetUtil.joinLobby(p);
         dualUtil.clearSidebar(p);
     }
 
-    private Set<UUID> checkRoundVictory(Instance inst) {
+    private void checkRoundVictory(Instance inst) {
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
-        Set<UUID> winnerPlayers = new HashSet<>();
+//        Set<UUID> winnerPlayers = new HashSet<>();
 
             if (inst.type.equals("duel")) {
                 if (aliveA == 0 && aliveB > 0) {
                     if (inst.party) {
                         inst.partyScoreMap.put("teamB", inst.partyScoreMap.get("teamB") +1 );
-                        winnerPlayers = inst.teamB;
+//                        winnerPlayers = inst.teamB;
                     } else {
                         for (UUID id : inst.teamB) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) + 1);
-                            winnerPlayers = inst.teamB;
+//                            winnerPlayers = inst.teamB;
                         }
                     }
                 } else if (aliveB == 0 && aliveA > 0) {
                     if (inst.party) {
                         inst.partyScoreMap.put("teamA", inst.partyScoreMap.get("teamA") +1 );
-                        winnerPlayers = inst.teamA;
+//                        winnerPlayers = inst.teamA;
                     } else {
                         for (UUID id : inst.teamA) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) +1 );
-                            winnerPlayers = inst.teamA;
+//                            winnerPlayers = inst.teamA;
                         }
                     }
                 } else if (aliveA == 0 && aliveB == 0) {
@@ -799,7 +802,7 @@ public class DuelManager {
                     for (UUID id : inst.teamA) {
                         if (!inst.eliminated.contains(id)) {
                             inst.scoreMap.put(id, inst.scoreMap.get(id) + 1);
-                            winnerPlayers.add(id);
+//                            winnerPlayers.add(id);
                             break;
                         }
                     }
@@ -809,7 +812,7 @@ public class DuelManager {
             }
 
             dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
-            return winnerPlayers;
+//            return winnerPlayers;
 
     }
 
