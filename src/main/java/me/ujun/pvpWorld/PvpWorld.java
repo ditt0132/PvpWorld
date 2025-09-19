@@ -85,13 +85,15 @@ public final class PvpWorld extends JavaPlugin {
 
     private void registerCommands() {
         CommandTabCompleter commandTabCompleter = new CommandTabCompleter(duelManager);
+        ForceDuelCMD forceDuelCMD = new ForceDuelCMD(kitManager, duelManager, this);
 
         getCommand("lobby").setExecutor(new LobbyCMD());
         getCommand("pvpworld").setExecutor(new PvpWorldCMD(this, kitManager, kitsFile, arenaManager));
         getCommand("ffa").setExecutor(new FfaCMD(kitManager));
         getCommand("duel").setExecutor(new DuelCMD(kitManager, duelManager));
         getCommand("party").setExecutor(new PartyCMD(kitManager, duelManager));
-        getCommand("forceduel").setExecutor(new ForceDuelCMD(kitManager, duelManager));
+        getCommand("forceduel").setExecutor(forceDuelCMD);
+        getServer().getPluginManager().registerEvents(forceDuelCMD, this);
         getCommand("duelwatch").setExecutor(new DuelWatchCMD(duelManager));
         getCommand("leave").setExecutor(new LeaveCMD(duelManager));
 

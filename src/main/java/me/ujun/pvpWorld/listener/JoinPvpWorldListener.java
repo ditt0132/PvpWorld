@@ -24,6 +24,9 @@ public class JoinPvpWorldListener implements Listener {
     private void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
+        if (duel.offlineDuelInvited.contains(player.getUniqueId())) {
+            return;
+        }
 
         if (ConfigHandler.pvpWorld.contains(player.getLocation().getWorld().getName())) {
             ResetUtil.joinLobby(player);

@@ -10,28 +10,33 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.net.http.WebSocket;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ForceDuelCMD implements CommandExecutor {
+public class ForceDuelCMD implements CommandExecutor, Listener {
     private final KitManager kitManager;
     private final DuelManager duelManager;
+    private final JavaPlugin plugin;
 
     private final long EXPIRE_MILLIS = 60_000;
-    private final Map<UUID, Map<UUID, me.ujun.pvpWorld.command.DuelCMD.Invite>> inbox = new ConcurrentHashMap<>();
+    private final Map<UUID, me.ujun.pvpWorld.command.DuelCMD.Invite> forceInbox = new ConcurrentHashMap<>();
 
-    public ForceDuelCMD(KitManager kitManager, DuelManager duelManager) {
+    public ForceDuelCMD(KitManager kitManager, DuelManager duelManager, JavaPlugin plugin) {
         this.kitManager = kitManager;
         this.duelManager = duelManager;
+        this.plugin = plugin;
     }
 
 
@@ -45,7 +50,7 @@ public class ForceDuelCMD implements CommandExecutor {
             return false;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         String kitName = args[1];
         int roundSetting = 1;
 
@@ -59,7 +64,6 @@ public class ForceDuelCMD implements CommandExecutor {
             return false;
         }
 
-        if (duelManager.isInDuel(player) || duelManager.isInDuel(target)) { player.sendMessage("§c이미 듀얼 중인 플레이어가 있습니다."); return true; }
 
         if (!kitManager.exists(kitName)) {
             sender.sendMessage(ChatColor.RED + "없는 키트입니다: " + kitName);
@@ -72,9 +76,26 @@ public class ForceDuelCMD implements CommandExecutor {
             roundSetting = Math.max(Integer.parseInt(args[2]), 1);
         }
 
+        if (!target.isOnline()) {
+            duelManager.offlineDuelInvited.add(target.getUniqueId());
+
+            forceInbox.put(target.getUniqueId(), new DuelCMD.Invite(player.getUniqueId(), target.getUniqueId(), kit.getName(), roundSetting, System.currentTimeMillis() + EXPIRE_MILLIS));
+
+            sender.sendMessage( ChatColor.YELLOW + "해당 플레이어가 오프라인입니다.\n접속시 실행됩니다");
+            return true;
+        }
+
+        Player onlineTarget = (Player) target;
+        if (duelManager.isInDuel(player) || duelManager.isInDuel(onlineTarget)) { player.sendMessage("§c이미 듀얼 중인 플레이어가 있습니다."); return true; }
+
+        return startDuel(player, onlineTarget, kit, roundSetting);
+    }
+
+
+    private boolean startDuel(Player player, Player target, Kit kit, int roundSetting) {
         player.sendMessage("§a§l" + target.getName() + "§f§l님에게 강제 듀얼을 실행했습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + roundSetting + "§f§l)");
         Component msg = Component.text(player.getName(), NamedTextColor.RED, TextDecoration.BOLD)
-                .append(Component.text("님에게 강제 듀얼을 실행받았습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + String.valueOf(roundSetting) + "§f§l)", NamedTextColor.WHITE, TextDecoration.BOLD));
+                .append(Component.text("님에게 강제 듀얼을 실행받았습니다. (키트: §b§l" + kit.getDisplayName() + "§f§l | 라운드: §e§l" + roundSetting + "§f§l)", NamedTextColor.WHITE, TextDecoration.BOLD));
         target.sendMessage(msg);
 
         boolean ok = duelManager.startDuel(new ArrayList<>(List.of(player)), new ArrayList<>(List.of(target)), kit, roundSetting, false);
@@ -83,7 +104,36 @@ public class ForceDuelCMD implements CommandExecutor {
             target.sendMessage("§c듀얼 시작 실패.");
             return false;
         }
-
         return true;
+    }
+
+    @EventHandler
+    void onPlayerJoin(PlayerJoinEvent e) {
+        Player target = e.getPlayer();
+
+        if (duelManager.offlineDuelInvited.contains(target.getUniqueId())) {
+            duelManager.offlineDuelInvited.remove(target.getUniqueId());
+
+            DuelCMD.Invite inv = forceInbox.get(target.getUniqueId());
+            if (inv == null) { return; }
+//            if (inv.expired()) {
+//                forceInbox.remove(target.getUniqueId());
+//                return;
+//            }
+
+            Player player = Bukkit.getPlayer(inv.from);
+
+            if (player == null) {
+                forceInbox.remove(target.getUniqueId());
+                return;
+            }
+
+            Kit kit = kitManager.get(inv.kitName);
+
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                startDuel(player, target, kit, inv.roundSetting);
+            }, 5L);
+
+        }
     }
 }

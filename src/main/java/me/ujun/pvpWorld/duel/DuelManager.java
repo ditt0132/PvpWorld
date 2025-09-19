@@ -46,6 +46,8 @@ public class DuelManager {
     public final Set<UUID> spectators = new HashSet<>();
     public final Map<UUID, Instance> byPlayer = new HashMap<>();
     public final Set<UUID> offlinePlayers = new HashSet<>();
+    public final Set<UUID> offlineDuelInvited = new HashSet<>();
+    public final Set<UUID> leavingPlayer = new HashSet<>();
 
     public DuelManager(ArenaManager arenaManager, ArenasFile arenasFile, VoidManager voidWorld, ArenaAllocator allocator, KitManager kitManager, DuelUtil dualUtil, JavaPlugin plugin) {
         this.arenaManager = arenaManager;
@@ -728,6 +730,7 @@ public class DuelManager {
 
 
     public void leaveDuel(Player p, Instance inst) {
+        leavingPlayer.add(p.getUniqueId());
         int teamSize = 0;
 
         if (inst.watchers.contains(p.getUniqueId())) {
@@ -766,6 +769,8 @@ public class DuelManager {
         }
         ResetUtil.joinLobby(p);
         dualUtil.clearSidebar(p);
+        leavingPlayer.remove(p.getUniqueId());
+
     }
 
     private void checkRoundVictory(Instance inst) {
@@ -819,6 +824,7 @@ public class DuelManager {
     private void checkVictory(Instance inst) {
         UUID id = inst.scoreMap.entrySet().stream()
                 .filter(e -> e.getValue() != null)
+                .filter(e -> !leavingPlayer.contains(e.getKey()))
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse(null);
@@ -827,6 +833,11 @@ public class DuelManager {
         if (inst.type.equals("duel")) {
             if (inst.party) {
                 Set<UUID> victoryTeam = (inst.partyScoreMap.get("teamA") > inst.partyScoreMap.get("teamB")) ? inst.teamA : inst.teamB;
+
+                if (victoryTeam.stream().anyMatch(leavingPlayer::contains)) {
+                    victoryTeam = (inst.teamB.equals(victoryTeam) ? inst.teamA : inst.teamB);
+                }
+
                 if (inst.teamA.equals(victoryTeam)) {
                     dualUtil.sendEndTitle(inst, inst.teamA);
                 } else if (inst.teamB.equals(victoryTeam)) {
