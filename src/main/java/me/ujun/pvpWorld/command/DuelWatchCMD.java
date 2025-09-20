@@ -49,6 +49,12 @@ public class DuelWatchCMD implements CommandExecutor {
             sender.sendMessage("듀얼 중인 플레이어가 아님");
             return false;
         }
+
+        if (inst.isShuttingDown) {
+            sender.sendMessage("게임이 종료되는 중");
+            return false;
+        }
+
         duel.byPlayer.put(player.getUniqueId(), inst);
 
         Location loc = inst.origin.clone().add(inst.meta.center().dx(), inst.meta.center().dy(), inst.meta.center().dz());

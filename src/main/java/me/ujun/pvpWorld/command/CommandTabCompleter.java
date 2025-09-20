@@ -3,6 +3,7 @@ package me.ujun.pvpWorld.command;
 import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.arena.ArenaManager;
 import me.ujun.pvpWorld.duel.DuelManager;
+import me.ujun.pvpWorld.duel.Instance;
 import me.ujun.pvpWorld.kit.KitManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -30,7 +31,7 @@ public class CommandTabCompleter implements TabCompleter {
 
         if (command.getName().equals("pvpworld")) {
             if (args.length == 1) {
-                return prefixed(Arrays.asList("reload", "setlobby", "kit", "dev", "set_ffa_spawn", "arena"), args[0]);
+                return prefixed(Arrays.asList("reload", "setlobby", "kit", "dev", "set_ffa_spawn", "arena", "duel"), args[0]);
             } else if (args.length == 2) {
                 if (args[0].equals("kit")) {
                     return prefixed(Arrays.asList("create", "delete", "edit", "save", "load", "apply", "list"), args[1]);
@@ -40,6 +41,8 @@ public class CommandTabCompleter implements TabCompleter {
                     return prefixed(KitManager.kits.keySet().stream().toList(), args[1]);
                 } else if (args[0].equals("arena")) {
                     return prefixed(Arrays.asList("create", "mark", "register", "list", "delete", "cancel", "pastehere"), args[1]);
+                } else if (args[0].equals("duel")) {
+                    return prefixed(Arrays.asList("shutdown"), args[1]);
                 }
             } else if (args.length == 3) {
                 if (args[0].equals("kit")) {
@@ -69,6 +72,8 @@ public class CommandTabCompleter implements TabCompleter {
                     } else if (args[1].equals("delete") || args[1].equals("pastehere")) {
                         return prefixed(ArenaManager.arenas.keySet().stream().toList() ,args[2]);
                     }
+                } else if (args[0].equals("duel") && args[1].equals("shutdown")) {
+                    return prefixed(getDuelOnlinePlayerNames(), args[2]);
                 }
             } else if (args.length == 4) {
                 if (args[0].equals("kit")) {
@@ -115,6 +120,10 @@ public class CommandTabCompleter implements TabCompleter {
     private List<String> getDuelOnlinePlayerNames() {
         return Bukkit.getOnlinePlayers().stream()
                 .filter(duel::isInDuel)
+                .filter(p -> {
+                    Instance inst = duel.getInstanceOf(p);
+                    return !inst.watchers.contains(p.getUniqueId());
+                })
                 .map(Player::getName)
                 .collect(Collectors.toList());
     }

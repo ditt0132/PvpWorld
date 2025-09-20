@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 import org.bukkit.util.ChatPaginator;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -221,9 +222,12 @@ public class DuelUtil {
     private Component formatPlayerHealth(Instance inst, UUID id) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(id);
         String healthInfo = "§cdead";
+
+        DecimalFormat df = new DecimalFormat("#.##");
+
         if (offlinePlayer.isOnline() && !inst.eliminated.contains(id)) {
             Player player = (Player) offlinePlayer;
-            healthInfo = "§c" + Math.round(player.getHealth()) + "❤";
+            healthInfo = "§c" + df.format(player.getHealth()) + "❤";
         }
 
         return Component.text(offlinePlayer.getName()).color(NamedTextColor.WHITE).append(Component.text(" " + healthInfo));

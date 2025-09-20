@@ -451,7 +451,7 @@ public class DuelManager {
 
 
 
-    private void endInternal(Instance inst) {
+    public void endInternal(Instance inst) {
         if (inst.ended) return;
         inst.ended = true;
 

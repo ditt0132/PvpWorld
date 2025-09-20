@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -92,9 +93,9 @@ public class FfaListener implements Listener {
         if (PvpWorld.pvpPlayerTimer.containsKey(dead.getUniqueId())) {
             Player killer = event.getPlayer().getKiller();
             if (killer != null) {
-                double hp = Math.max(0.0, killer.getHealth());
+                DecimalFormat df = new DecimalFormat("#.##");
 
-                String hpText = String.format("%.2f❤", hp);
+                String hpText = df.format(killer.getHealth()) + "❤";
                 Component orig = event.deathMessage();
                 Component suffix = Component.space()
                         .append(Component.text("[", NamedTextColor.GRAY))

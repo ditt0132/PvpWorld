@@ -4,6 +4,8 @@ import me.ujun.pvpWorld.PvpWorld;
 import me.ujun.pvpWorld.arena.ArenaManager;
 import me.ujun.pvpWorld.arena.ArenaMeta;
 import me.ujun.pvpWorld.config.ConfigHandler;
+import me.ujun.pvpWorld.duel.DuelManager;
+import me.ujun.pvpWorld.duel.Instance;
 import me.ujun.pvpWorld.saving.ArenasFile;
 import me.ujun.pvpWorld.saving.KitsFile;
 import me.ujun.pvpWorld.kit.Kit;
@@ -26,13 +28,15 @@ public class PvpWorldCMD implements CommandExecutor {
     private final KitManager kitManager;
     private final KitsFile kitsFile;
     private final ArenaManager arenaManager;
+    private final DuelManager duel;
 
 
-    public PvpWorldCMD(JavaPlugin plugin, KitManager kitManager, KitsFile kitsFile, ArenaManager arenaManager) {
+    public PvpWorldCMD(JavaPlugin plugin, KitManager kitManager, KitsFile kitsFile, ArenaManager arenaManager, DuelManager duel) {
         this.plugin = plugin;
         this.kitManager = kitManager;
         this.kitsFile = kitsFile;
         this.arenaManager = arenaManager;
+        this.duel = duel;
     }
 
     @Override
@@ -353,6 +357,41 @@ public class PvpWorldCMD implements CommandExecutor {
                 boolean ok = arenaManager.pasteHere(player, name.toLowerCase(Locale.ROOT));
                 player.sendMessage(ok ? "§a현재 위치에 붙여넣었습니다." : "§c붙여넣기 실패(아레나/파일 확인).");
                 return true;
+            }
+        } else if (subCommand.equals("duel")) {
+            if (args.length < 2) {
+                return false;
+            }
+
+            String duelSubCommand = args[1];
+
+            if (duelSubCommand.equals("shutdown")) {
+                Player target = Bukkit.getPlayer(args[2]);
+
+                if (target == null) {
+                    sender.sendMessage("없는 플레이어");
+                    return false;
+                }
+
+                if (!(duel.isInDuel(target))) {
+                    sender.sendMessage("듀얼 중인 플레이어가 아님");
+                    return false;
+                }
+
+                Instance inst = duel.getInstanceOf(target);
+
+                if (inst.watchers.contains(target.getUniqueId())) {
+                    sender.sendMessage("듀얼 중인 플레이어가 아님");
+                    return false;
+                }
+
+                if (inst.isShuttingDown) {
+                    sender.sendMessage("게임이 종료되는 중");
+                    return false;
+                }
+
+                sender.sendMessage("해당 플레이어가 참여한 듀얼을 종료시킵니다");
+                duel.endInternal(inst);
             }
         }
 
