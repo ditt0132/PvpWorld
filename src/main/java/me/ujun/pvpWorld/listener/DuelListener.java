@@ -239,7 +239,7 @@ public class DuelListener implements Listener {
         }
 
         Instance inst = duel.getInstanceOf(player);
-        if (inst.isShuttingDown || inst.countdown) return;
+//        if (inst.isShuttingDown) return;
 
         if (inst.watchers.contains(player.getUniqueId())) {
             duel.leaveDuel(player, inst);

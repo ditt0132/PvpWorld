@@ -19,6 +19,7 @@ public class ResetUtil {
         player.clearActivePotionEffects();
         player.setHealth(player.getMaxHealth());
         player.setFireTicks(0);
+        player.setFallDistance(0);
 
         //food reset
         player.setFoodLevel(20);

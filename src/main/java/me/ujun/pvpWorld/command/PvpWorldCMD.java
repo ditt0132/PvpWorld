@@ -392,6 +392,7 @@ public class PvpWorldCMD implements CommandExecutor {
 
                 sender.sendMessage("해당 플레이어가 참여한 듀얼을 종료시킵니다");
                 duel.endInternal(inst);
+                duel.byPlayer.remove(target.getUniqueId());
             }
         }
 
