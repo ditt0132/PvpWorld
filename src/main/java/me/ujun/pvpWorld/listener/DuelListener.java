@@ -2,11 +2,13 @@ package me.ujun.pvpWorld.listener;
 
 import me.ujun.pvpWorld.duel.DuelManager;
 import me.ujun.pvpWorld.duel.Instance;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.BubbleColumn;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Snowball;
@@ -22,6 +24,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -94,20 +97,40 @@ public class DuelListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onDamageBy(EntityDamageByEntityEvent e) {
         if (!(e.getEntity() instanceof Player victim)) return;
-        if (!(e.getDamager() instanceof Player dam)) return;
-        Instance inst = duel.getInstanceOf(dam);
+//        if (!(victim.getKiller() instanceof Player attacker)) return;
+        Projectile projectile;
+        Player attacker = null;
+
+        if (e.getDamager() instanceof  Player) {
+            attacker = (Player) e.getDamager();
+        } else if (e.getDamager() instanceof Projectile) {
+            projectile = (Projectile) e.getDamager();
+            if (projectile.getShooter() instanceof Player) {
+                attacker = (Player) projectile.getShooter();
+            }
+        } else {
+            return;
+        }
+
+
+
+        Instance inst = duel.getInstanceOf(attacker);
 
         if (inst == null) {
             return;
         }
 
         if (inst.type.equals("duel")) {
-            if (inst.teamB.contains(dam.getUniqueId()) && inst.teamB.contains(victim.getUniqueId())) {
+
+            Bukkit.getLogger().info(attacker.getName() + " -> " + victim.getName());
+
+
+            if (inst.teamB.contains(attacker.getUniqueId()) && inst.teamB.contains(victim.getUniqueId())) {
                 e.setCancelled(true);
                 return;
             }
 
-            if (inst.teamA.contains(dam.getUniqueId()) && inst.teamA.contains(victim.getUniqueId())) {
+            if (inst.teamA.contains(attacker.getUniqueId()) && inst.teamA.contains(victim.getUniqueId())) {
                 e.setCancelled(true);
                 return;
             }
@@ -117,7 +140,7 @@ public class DuelListener implements Listener {
             e.setCancelled(true);
             return;
         }
-        if (duel.spectators.contains(dam.getUniqueId())) {
+        if (duel.spectators.contains(attacker.getUniqueId())) {
             e.setCancelled(true);
         }
     }

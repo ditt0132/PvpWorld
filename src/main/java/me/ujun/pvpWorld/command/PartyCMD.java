@@ -132,7 +132,7 @@ public class PartyCMD implements CommandExecutor {
                 return false;
             }
 
-            for (UUID id : partys.get(p.getUniqueId())) {
+            for (UUID id : new HashSet<>(party)) {
                 Player partyPlayer = Bukkit.getPlayer(id);
 
                 partyLeaderMap.put(id, target.getUniqueId());
@@ -143,7 +143,6 @@ public class PartyCMD implements CommandExecutor {
             }
 
             partys.put(target.getUniqueId(), party);
-            party.remove(p.getUniqueId());
         } else if (subCommand.equals("leave")) {
             if (!partyLeaderMap.containsKey(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");

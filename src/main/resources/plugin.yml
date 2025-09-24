@@ -23,6 +23,8 @@ commands:
   pvpworld:
     permission: pvpworld.admin
     usage: /pvpworld <subcommand>
+  nodisconnect:
+    permission: op
 
 permissions:
   pvpworld.admin:

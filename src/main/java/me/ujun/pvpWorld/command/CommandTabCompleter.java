@@ -98,8 +98,10 @@ public class CommandTabCompleter implements TabCompleter {
             if (args.length == 1) {
                 return prefixed(Arrays.asList("create", "disband", "leader", "leave", "invite", "accept", "list", "ffa", "duel", "kick"),args[0]);
             } else if (args.length == 2) {
-                if (args[0].equals("leader") || args[0].equals("accept") || args[0].equals("invite") || args[0].equals("deny") || args[0].equals("kick") || args[0].equals("duel")) {
+                if (args[0].equals("leader") || args[0].equals("accept") || args[0].equals("invite") || args[0].equals("deny") || args[0].equals("kick")) {
                     return prefixed(getOnlinePlayerNames(), args[1]);
+                } else if (args[0].equals("duel")) {
+                    return prefixed(getPartyLeaderNames(), args[1]);
                 } else if (args[0].equals("ffa")) {
                     return prefixed(KitManager.kits.keySet().stream().toList(), args[1]);
                 }
@@ -115,6 +117,15 @@ public class CommandTabCompleter implements TabCompleter {
 
         return Collections.emptyList();
 
+    }
+
+    private List<String> getPartyLeaderNames() {
+        return Bukkit.getOnlinePlayers().stream()
+                .filter(p -> {
+                    return PartyCMD.partyLeaderMap.containsKey(p.getUniqueId());
+                })
+                .map(Player::getName)
+                .collect(Collectors.toList());
     }
 
     private List<String> getDuelOnlinePlayerNames() {

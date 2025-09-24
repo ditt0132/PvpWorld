@@ -172,6 +172,30 @@ public class DuelUtil {
                     Component.text("§c❤"));
             belowNameObjective.setDisplaySlot(DisplaySlot.BELOW_NAME);
 
+            if (inst.type.equals("duel")) {
+                Team redTeam = board.getTeam("red");
+                if (redTeam == null) {
+                    redTeam = board.registerNewTeam("red");
+                    redTeam.setColor(ChatColor.RED);
+                }
+
+                Team blueTeam = board.getTeam("aqua");
+                if (blueTeam == null) {
+                    blueTeam = board.registerNewTeam("aqua");
+                    blueTeam.setColor(ChatColor.AQUA);
+                }
+
+                for (Player instPlayer : getInstOnlinePlayers(inst)) {
+
+                    if (inst.teamA.contains(instPlayer.getUniqueId())) {
+                        redTeam.addEntry(instPlayer.getName());
+                    } else if (inst.teamB.contains(instPlayer.getUniqueId())) {
+                        blueTeam.addEntry(instPlayer.getName());
+                    }
+                }
+            }
+
+
             p.setScoreboard(board);
             scoreboardMap.put(p, board);
         }
