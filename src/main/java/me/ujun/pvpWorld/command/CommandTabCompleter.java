@@ -122,7 +122,7 @@ public class CommandTabCompleter implements TabCompleter {
     private List<String> getPartyLeaderNames() {
         return Bukkit.getOnlinePlayers().stream()
                 .filter(p -> {
-                    return PartyCMD.partyLeaderMap.containsKey(p.getUniqueId());
+                    return PartyCMD.isMemberInAnyParty(p.getUniqueId());
                 })
                 .map(Player::getName)
                 .collect(Collectors.toList());

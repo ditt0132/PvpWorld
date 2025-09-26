@@ -18,6 +18,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 public class PartyCMD implements CommandExecutor {
 
     public static Map<UUID, Set<UUID>> partys = new HashMap<>(); //파티용 맵
-    public static Map<UUID, UUID> partyLeaderMap = new HashMap<>(); //플레이어에게서 파티 리더를 얻기 위한 맵 + 플레이어가 파티에 있는지 확인용
+    //public static Map<UUID, UUID> partyLeaderMap = new HashMap<>(); //플레이어에게서 파티 리더를 얻기 위한 맵 + 플레이어가 파티에 있는지 확인용
     private final KitManager kitManager;
     private final DuelManager duelManager;
 
@@ -52,7 +53,18 @@ public class PartyCMD implements CommandExecutor {
     private final Map<UUID, Map<UUID, Invite>> inbox = new HashMap<>();
     private final Map<UUID, Map<UUID, DuelRequest>> duelInbox = new HashMap<>();
 
+    // 유틸 함수
+    public static boolean isMemberInAnyParty(UUID member) {
+        return partys.values().stream().anyMatch(set -> set.contains(member));
+    }
 
+    public static @Nullable UUID getPartyLeaderByMember(UUID member) {
+        return partys.entrySet().stream()
+                .filter(set -> set.getValue().contains(member))
+                .map(Map.Entry::getKey)
+                .findAny()
+                .orElse(null);
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -70,7 +82,7 @@ public class PartyCMD implements CommandExecutor {
         String subCommand = args[0];
 
         if (subCommand.equals("create")) {
-            if (partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "이미 파티에 속해 있습니다");
                 return false;
             }
@@ -78,11 +90,10 @@ public class PartyCMD implements CommandExecutor {
 
             Set<UUID> party = new HashSet<>();
             party.add(p.getUniqueId());
-            partyLeaderMap.put(p.getUniqueId(), p.getUniqueId());
             partys.put(p.getUniqueId(), party);
             p.sendMessage(ChatColor.GREEN + "파티를 생성했습니다");
         } else if (subCommand.equals("disband")) {
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
@@ -96,7 +107,6 @@ public class PartyCMD implements CommandExecutor {
             for (UUID id : partys.get(p.getUniqueId())) {
                 Player partyPlayer = Bukkit.getPlayer(id);
 
-                partyLeaderMap.remove(id);
                 if (partyPlayer != null) {
                     partyPlayer.sendMessage(ChatColor.GOLD + "파티가 해산되었습니다");
                 }
@@ -104,7 +114,7 @@ public class PartyCMD implements CommandExecutor {
 
             partys.remove(p.getUniqueId());
         } else if (subCommand.equals("leader")) {
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
@@ -135,8 +145,6 @@ public class PartyCMD implements CommandExecutor {
             for (UUID id : new HashSet<>(party)) {
                 Player partyPlayer = Bukkit.getPlayer(id);
 
-                partyLeaderMap.put(id, target.getUniqueId());
-
                 if (partyPlayer != null) {
                     partyPlayer.sendMessage("파티 리더를 §e" + target.getName() + "§f님에게 위임했습니다");
                 }
@@ -144,7 +152,7 @@ public class PartyCMD implements CommandExecutor {
 
             partys.put(target.getUniqueId(), party);
         } else if (subCommand.equals("leave")) {
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
@@ -154,7 +162,7 @@ public class PartyCMD implements CommandExecutor {
                 return false;
             }
 
-            UUID partyLeaderId = partyLeaderMap.get(p.getUniqueId());
+            UUID partyLeaderId = getPartyLeaderByMember(p.getUniqueId()); // null 반환하면요? - ditt0132
             Set<UUID> party = partys.get(partyLeaderId);
 
             for (UUID id : party) {
@@ -166,7 +174,6 @@ public class PartyCMD implements CommandExecutor {
             }
 
             party.remove(p.getUniqueId());
-            partyLeaderMap.remove(p.getUniqueId());
             partys.put(partyLeaderId, party);
         } else if (subCommand.equals("invite")) {
             if (!partys.containsKey(p.getUniqueId())) {
@@ -183,7 +190,7 @@ public class PartyCMD implements CommandExecutor {
                 p.sendMessage("§c자기 자신은 초대할 수 없습니다");
                 return true;
             }
-            if (partyLeaderMap.containsKey(target.getUniqueId())) {
+            if (isMemberInAnyParty(target.getUniqueId())) {
                 p.sendMessage("§c상대는 이미 다른 파티에 속해 있습니다");
                 return true;
             }
@@ -209,7 +216,7 @@ public class PartyCMD implements CommandExecutor {
                 p.sendMessage("§e사용법: /party accept <leader>");
                 return true;
             }
-            if (partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage("§c이미 파티에 속해 있습니다 먼저 탈퇴하세요.");
                 return true;
             }
@@ -237,7 +244,6 @@ public class PartyCMD implements CommandExecutor {
 
 
             party.add(p.getUniqueId());
-            partyLeaderMap.put(p.getUniqueId(), leader.getUniqueId());
 
 
 
@@ -334,15 +340,14 @@ public class PartyCMD implements CommandExecutor {
 
 
             party.remove(target.getUniqueId());
-            partyLeaderMap.remove(target.getUniqueId());
 
         } else if (subCommand.equals("list")) {
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
 
-            UUID partyLeaderId = partyLeaderMap.get(p.getUniqueId());
+            UUID partyLeaderId = getPartyLeaderByMember(p.getUniqueId());
             Set<UUID> party = new HashSet<>(partys.get(partyLeaderId));
             Player leader = Bukkit.getPlayer(partyLeaderId);
             String leaderName = "알 수 없음";
@@ -366,7 +371,7 @@ public class PartyCMD implements CommandExecutor {
             }
 
 
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
@@ -411,7 +416,7 @@ public class PartyCMD implements CommandExecutor {
                 return false;
             }
 
-            if (!partyLeaderMap.containsKey(p.getUniqueId())) {
+            if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
                 return false;
             }
