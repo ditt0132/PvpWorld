@@ -21,6 +21,7 @@ public class ResetUtil {
         player.setFireTicks(0);
         player.setFallDistance(0);
 
+        player.getScoreboardTags().remove(ConfigHandler.ffaTag);
         //food reset
         player.setFoodLevel(20);
         player.setSaturation(0);

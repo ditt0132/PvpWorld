@@ -46,7 +46,7 @@ public class FfaCMD implements CommandExecutor {
             return false;
         }
 
-        Kit kit = kitManager.get(kitName);  
+        Kit kit = kitManager.get(kitName);
         PvpWorld.playerKits.put(player.getUniqueId(), kit);
         kitManager.applyTo(player, kit, true, true);
         player.teleport(spawnLocation);
