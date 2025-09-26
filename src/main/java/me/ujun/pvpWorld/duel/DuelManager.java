@@ -32,6 +32,7 @@ import javax.swing.plaf.SpinnerUI;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.text.DecimalFormat;
 
 public class DuelManager {
     private final ArenaManager arenaManager;
@@ -580,6 +581,8 @@ public class DuelManager {
         return arr; // arr.length==2면 arr[0]=1등, arr[1]=2등(동점이면 같은 값)
     }
 
+    private DecimalFormat df = new DecimalFormat("#.00");
+
     public void eliminate(Player dead, @Nullable Player killer) {
         Instance inst = byPlayer.get(dead.getUniqueId());
         if (inst == null) return;
@@ -591,7 +594,8 @@ public class DuelManager {
 
         String deathMessage;
         if (killer != null) {
-            deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + ChatColor.GREEN + killer.getName() + ChatColor.RESET + "님에게 살해당했습니다");
+            deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + ChatColor.GREEN + killer.getName() + ChatColor.RESET + "님에게 살해당했습니다 "
+                           + ChatColor.RED + "(" + df.format(killer.getHealth()) + ")";
         } else {
             deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + "사망했습니다");
         }
