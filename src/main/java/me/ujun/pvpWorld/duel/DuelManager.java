@@ -595,7 +595,7 @@ public class DuelManager {
         String deathMessage;
         if (killer != null) {
             deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + ChatColor.GREEN + killer.getName() + ChatColor.RESET + "님에게 살해당했습니다 "
-                           + ChatColor.RED + "(" + df.format(killer.getHealth()) + ")";
+                           + ChatColor.RED + "(" + df.format(killer.getHealth()) + ")");
         } else {
             deathMessage = (ChatColor.RED + dead.getName() + ChatColor.RESET + "님이 듀얼에서 " + "사망했습니다");
         }
@@ -617,6 +617,7 @@ public class DuelManager {
         int aliveA = aliveCount(inst, inst.teamA);
         int aliveB = aliveCount(inst, inst.teamB);
 
+        Bukkit.getLogger().info(String.valueOf(aliveA));
 
         int onlineA = 0;
         int onlineB = 0;
@@ -663,10 +664,17 @@ public class DuelManager {
         }
 
 
-//        Bukkit.getLogger().info(aliveA + " | " + aliveB);
-        if ( (aliveA > 0 && aliveB > 0 ) && !isTimeout) {
-            return;
+        if (!isTimeout) {
+            if (inst.type.equals("duel")) {
+                if (aliveA > 0 && aliveB > 0) return;
+            } else if (inst.type.equals("ffa")) {
+                if (aliveA > 1) return;
+            }
         }
+
+//        Bukkit.getLogger().info(aliveA + " | " + aliveB);
+
+
         if (isTimeout) {
             dualUtil.sendTitleToPlayers(inst, ChatColor.YELLOW + "무승부", 0, 20, 0);
             dualUtil.playSoundToPlayers(inst, Sound.BLOCK_NOTE_BLOCK_BASS, 1, 1);

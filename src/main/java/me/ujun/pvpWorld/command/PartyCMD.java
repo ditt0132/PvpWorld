@@ -66,6 +66,10 @@ public class PartyCMD implements CommandExecutor {
                 .orElse(null);
     }
 
+    public boolean isPartyLeader(UUID id) {
+        return partys.containsKey(id);
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -151,6 +155,7 @@ public class PartyCMD implements CommandExecutor {
             }
 
             partys.put(target.getUniqueId(), party);
+            partys.remove(p.getUniqueId());
         } else if (subCommand.equals("leave")) {
             if (!isMemberInAnyParty(p.getUniqueId())) {
                 p.sendMessage(ChatColor.RED + "파티에 속해 있지 않습니다");
@@ -325,6 +330,8 @@ public class PartyCMD implements CommandExecutor {
                 p.sendMessage("§c해당 플레이어를 찾을 수 없습니다");
                 return false;
             }
+
+            if (!partys.containsKey(p.getUniqueId())) return false;
 
             Set<UUID> party = partys.get(p.getUniqueId());
 
