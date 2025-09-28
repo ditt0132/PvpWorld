@@ -581,7 +581,7 @@ public class DuelManager {
         return arr; // arr.length==2면 arr[0]=1등, arr[1]=2등(동점이면 같은 값)
     }
 
-    private DecimalFormat df = new DecimalFormat("#.00");
+    DecimalFormat df = new DecimalFormat("#.##");
 
     public void eliminate(Player dead, @Nullable Player killer) {
         Instance inst = byPlayer.get(dead.getUniqueId());
